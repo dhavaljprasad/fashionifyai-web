@@ -67,7 +67,7 @@ export const LandingPageTestimonials = () => {
           words={["Users", "Shops", "Tailors"]}
           className="text-6xl font-bold text-accent"
         />
-        <h1 className="text-center text-6xl font-bold text-black">
+        <h1 className="text-center text-6xl font-bold text-background-primary">
           already love it!
         </h1>
       </div>
@@ -79,7 +79,7 @@ export const LandingPageTestimonials = () => {
                 <Star key={i} size={16} color="#e65e10" fill="#e65e10" />
               ))}
             </div>
-            <h3 className="text-lg font-semibold text-black">
+            <h3 className="text-lg font-semibold text-background-primary">
               "{item.review}"
             </h3>
             <hr className="bg-background-secondary" />
@@ -90,7 +90,7 @@ export const LandingPageTestimonials = () => {
                 className="h-16 w-16 object-cover"
               />
               <div className="flex flex-col">
-                <span className="text-sm font-semibold text-black">
+                <span className="text-sm font-semibold text-background-primary">
                   {item.name}
                 </span>
                 <span className="text-xs text-gray-500">{item.shop}</span>
@@ -104,23 +104,33 @@ export const LandingPageTestimonials = () => {
           <div key={index} className="flex flex-col items-center gap-2">
             <div className="flex items-end justify-center gap-1">
               {item.type === "sales" && (
-                <span className="text-lg font-semibold text-black">₹</span>
+                <span className="text-lg font-semibold text-background-primary">
+                  ₹
+                </span>
               )}
               <NumberTicker
                 value={item.value}
-                className="text-4xl font-semibold text-black"
+                className="text-4xl font-semibold text-background-primary"
               />
               {item.type === "users" && (
-                <span className="text-lg font-semibold text-black">+</span>
+                <span className="text-lg font-semibold text-background-primary">
+                  +
+                </span>
               )}
               {item.type === "sales" && (
-                <span className="text-lg font-semibold text-black">L+</span>
+                <span className="text-lg font-semibold text-background-primary">
+                  L+
+                </span>
               )}
               {item.type === "rating" && (
-                <span className="text-lg font-semibold text-black">/5</span>
+                <span className="text-lg font-semibold text-background-primary">
+                  /5
+                </span>
               )}
               {item.type === "render" && (
-                <span className="text-lg font-semibold text-black">s</span>
+                <span className="text-lg font-semibold text-background-primary">
+                  s
+                </span>
               )}
             </div>
             <span className="text-sm text-background-secondary">

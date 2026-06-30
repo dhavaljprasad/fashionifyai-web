@@ -48,7 +48,7 @@ export const LandingPagePricing = ({ id }: { id?: string }) => {
         {pricingData.map((item, index) => (
           <div
             key={index}
-            className={`flex flex-col items-start justify-center gap-4 ${index === 0 ? "bg-background-primary text-text hover:bg-background-secondary" : "bg-contrast text-black"} p-8`}
+            className={`flex flex-col items-start justify-center gap-4 bg-background-primary text-text hover:bg-background-secondary p-8`}
           >
             <span className="text-sm font-bold text-accent">{item.name}</span>
 

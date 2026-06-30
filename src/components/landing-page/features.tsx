@@ -79,13 +79,13 @@ export const LandingPageFeatures = ({ id }: { id?: string }) => {
               </span>
               <feature.icon
                 size={18}
-                className="text-contrast transition-colors duration-200 group-hover:text-black"
+                className="text-contrast transition-colors duration-200 group-hover:text-background-primary"
               />
             </div>
-            <h3 className="text-lg font-bold text-contrast transition-colors duration-200 group-hover:text-black">
+            <h3 className="text-lg font-bold text-contrast transition-colors duration-200 group-hover:text-background-primary">
               {feature.title}
             </h3>
-            <p className="text-sm text-contrast transition-colors duration-200 group-hover:text-black">
+            <p className="text-sm text-contrast transition-colors duration-200 group-hover:text-background-primary">
               {feature.description}
             </p>
           </div>

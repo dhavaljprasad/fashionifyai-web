@@ -50,12 +50,12 @@ export const ButtonSecondary = ({
       className={`group flex h-auto w-fit cursor-pointer items-center justify-center gap-1 border bg-background-primary px-4 py-2 transition-colors duration-200 hover:bg-contrast ${buttonClass || ""}`}
     >
       {icon && (
-        <span className="text-xs font-semibold text-text transition-all group-hover:text-black">
+        <span className="text-xs font-semibold text-text transition-all group-hover:text-background-primary">
           {React.createElement(icon, { size: 16 })}
         </span>
       )}
       <span
-        className={`text-xs font-semibold text-text transition-all duration-200 group-hover:translate-x-1 group-hover:text-black ${buttonTextClass || ""}`}
+        className={`text-xs font-semibold text-text transition-all duration-200 group-hover:translate-x-1 group-hover:text-background-primary ${buttonTextClass || ""}`}
       >
         {text}
       </span>

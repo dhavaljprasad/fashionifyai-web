@@ -51,7 +51,7 @@ export const LandingPageHero = () => {
   }, []);
 
   return (
-    <div className="flex h-fit w-full flex-col items-start justify-between gap-4 px-4 sm:px-16 lg:flex-row lg:items-center">
+    <div className="flex h-fit w-full flex-col  items-start justify-between gap-4 px-4 sm:px-16 lg:flex-row lg:items-center">
       <div className="flex h-screen w-full flex-col items-start justify-center gap-4 lg:max-w-2xl">
         <div className="flex items-center justify-center gap-2 bg-background-secondary px-2 py-1">
           <div className="h-1 w-1 bg-accent" />
