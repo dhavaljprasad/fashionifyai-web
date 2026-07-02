@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { Figtree, Lora } from "next/font/google";
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { AuthProvider } from "../app/providers/auth";
 
 // init heading
 const loraHeading = Lora({ subsets: ["latin"], variable: "--font-heading" });
@@ -31,7 +32,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <ThemeProvider defaultTheme="system">{children}</ThemeProvider>
+        <ThemeProvider defaultTheme="system">
+          <AuthProvider>{children}</AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
