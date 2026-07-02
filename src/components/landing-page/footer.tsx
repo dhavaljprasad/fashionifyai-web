@@ -25,8 +25,8 @@ export const LandingPageFooter = () => {
             <h1 className="m-0 text-accent">AI</h1>
           </div>
           <span className="text-sm text-text">
-            An AI fashion visualization studio in your pocket; built for the
-            tailors and cloth shops and fashion fanatics of Bharat.
+            Your AI wardrobe stylist and fashion visualization studio — in your
+            pocket, everywhere in the world.
           </span>
         </div>
         <div className="w-full flex flex-col items-start justify-center gap-2">
