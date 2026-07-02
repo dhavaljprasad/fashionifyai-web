@@ -2,18 +2,20 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { api } from "@/lib/api";
 import type { UserType } from "@/lib/user";
 
 type AuthContextValue = {
   user: UserType | null;
   loading: boolean;
+  refreshUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue>({
   user: null,
   loading: true,
+  refreshUser: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -23,43 +25,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  useEffect(() => {
-    let cancelled = false;
+  const fetchUser = async () => {
+    setLoading(true);
 
-    async function fetchUser() {
-      setLoading(true);
+    try {
+      const res = await api.get("/auth/me");
+      setUser(res.data.data);
+    } catch {
+      setUser(null);
 
-      try {
-        const res = await api.get("/auth/me");
-
-        if (!cancelled) {
-          setUser(res.data.data);
-        }
-      } catch {
-        if (!cancelled) {
-          setUser(null);
-
-          // Safety net in case the session becomes invalid while inside the app.
-          if (pathname.startsWith("/app")) {
-            router.replace("/");
-          }
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+      // Safety net if the session becomes invalid while the app is open
+      if (pathname.startsWith("/app")) {
+        router.replace("/");
       }
+    } finally {
+      setLoading(false);
     }
+  };
 
+  useEffect(() => {
     fetchUser();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [pathname, router]);
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        refreshUser: fetchUser,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
