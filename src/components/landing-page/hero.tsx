@@ -1,17 +1,17 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { WordRotate } from "../ui/word-rotate";
 import { ButtonGroup, ButtonPrimary, ButtonSecondary } from "../modular/button";
 import { useRouter } from "next/navigation";
 
 import { ArrowRight, Play } from "lucide-react";
-// import { getCurrentUser, UserType } from "@/lib/user";
+import { useAuth } from "@/app/providers/auth";
 
 export const LandingPageHero = () => {
   const [selectedPreview, setSelectedPreview] = useState("Case I");
-  //   const [user, setUser] = useState<UserType | null>();
 
   const router = useRouter();
+  const { user } = useAuth();
 
   const heroPreview = [
     {
@@ -42,14 +42,6 @@ export const LandingPageHero = () => {
     },
   ];
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      //   const userInfo = await getCurrentUser();
-      //   setUser(userInfo);
-    };
-    fetchUser();
-  }, []);
-
   return (
     <div className="flex h-fit w-full flex-col  items-start justify-between gap-4 px-4 sm:px-16 lg:flex-row lg:items-center">
       <div className="flex h-screen w-full flex-col items-start justify-center gap-4 lg:max-w-3xl">
@@ -76,7 +68,7 @@ export const LandingPageHero = () => {
           you buy.
         </span>
         <div className="flex items-start justify-center gap-4">
-          {/* {user ? (
+          {user ? (
             <ButtonPrimary
               text="Start Now"
               onClick={() => router.push("/app")}
@@ -88,7 +80,7 @@ export const LandingPageHero = () => {
               onClick={() => router.push("/auth")}
               icon={ArrowRight}
             />
-          )} */}
+          )}
 
           <ButtonSecondary text="See Demo" icon={Play} />
         </div>

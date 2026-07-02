@@ -1,14 +1,14 @@
 "use client";
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ButtonPrimary } from "../modular/button";
+import { useAuth } from "@/app/providers/auth";
 
 export const LandingPageHeader = ({
   navItems,
 }: {
   navItems: { label: string; href?: string }[];
 }) => {
-  //   const [user, setUser] = useState<UserType | null>(null)
+  const { user } = useAuth();
   const router = useRouter();
 
   const handleClick = (
@@ -23,14 +23,6 @@ export const LandingPageHeader = ({
       }
     }
   };
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      //   const userInfo = await getCurrentUser()
-      //   setUser(userInfo)
-    };
-    fetchUser();
-  }, []);
 
   return (
     <div className="fixed z-10 flex h-16 w-full items-center justify-between border-b px-4 backdrop-blur-sm sm:px-16">
@@ -51,14 +43,14 @@ export const LandingPageHeader = ({
         ))}
       </div>
       <div className="hidden items-center justify-center gap-4 sm:flex">
-        {/* {user ? (
+        {user ? (
           <ButtonPrimary text="Start Now" onClick={() => router.push("/app")} />
         ) : (
           <ButtonPrimary
             text="Start Free Trial"
             onClick={() => router.push("/auth")}
           />
-        )} */}
+        )}
       </div>
     </div>
   );
