@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 
 const companyLinks = [
   {
@@ -13,6 +14,8 @@ const companyLinks = [
   { name: "Terms and Conditions", href: "/terms-and-conditions" },
 ];
 export const LandingPageFooter = () => {
+  const router = useRouter();
+
   return (
     <div className="flex h-fit w-full flex-col items-center justify-center gap-4 bg-background-primary px-4 py-8 sm:px-16">
       <div className="grid w-full grid-cols-1 gap-4 lg:grid-cols-3">
@@ -33,7 +36,7 @@ export const LandingPageFooter = () => {
               <span
                 key={link.name}
                 className="text-sm text-text hover:text-accent cursor-pointer"
-                onClick={() => window.open(link.href, "_blank")}
+                onClick={() => router.push(link.href)}
               >
                 {link.name}
               </span>
