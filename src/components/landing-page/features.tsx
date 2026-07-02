@@ -1,47 +1,47 @@
 "use client";
-import { Smartphone, Cpu, Brush, Zap, IndianRupee, Share2 } from "lucide-react";
+import { Smartphone, Cpu, Brush, Zap, Globe, Share2 } from "lucide-react";
 
 const featuresData = [
   {
     index: "01",
     title: "Mobile-first",
     description:
-      "Designed for phones in shops. Works on any browser, any device.",
+      "Designed for the phone in your hand. Works in any browser, on any device.",
     icon: Smartphone,
   },
   {
     index: "02",
-    title: "Realistic for Indian bodies",
+    title: "Every body, every skin tone",
     description:
-      "Trained on Indian skin tones, body types, and silhouettes: powered by agentic image generation, not just superimposition.",
+      "Trained across body types, skin tones, and silhouettes from every corner of the world.",
     icon: Cpu,
   },
   {
     index: "03",
-    title: "Custom design overlays",
+    title: "Design & remix",
     description:
-      "Draw on the preview or describe changes. Send tailor-ready visuals to your karigar.",
+      "Draw on the preview or describe changes in plain words. Style your look, tailor-ready.",
     icon: Brush,
   },
   {
     index: "04",
-    title: "Fast results",
+    title: "10-second renders",
     description:
-      "7–10 seconds per render. Show, don't tell, close the sale before they leave.",
+      "See yourself in a new outfit before the coffee cools. No waiting, no guessing.",
     icon: Zap,
   },
   {
     index: "05",
-    title: "Affordable for SMBs",
+    title: "Any store, any currency",
     description:
-      "Plans from ₹49. No subscription traps. Pay only for what you actually use.",
-    icon: IndianRupee,
+      "Paste links from Zara, Amazon, Shein, Farfetch — anywhere. We handle the rest.",
+    icon: Globe,
   },
   {
     index: "06",
-    title: "WhatsApp-ready exports",
+    title: "Share-ready exports",
     description:
-      "One-tap export. Share to WhatsApp, Instagram, or print straight from the phone.",
+      "One-tap export to Instagram, WhatsApp, iMessage — or straight to your favorite tailor.",
     icon: Share2,
   },
 ];
@@ -63,8 +63,8 @@ export const LandingPageFeatures = ({ id }: { id?: string }) => {
           </h1>
         </div>
         <span className="text-sm text-text">
-          Built ground-up for the dukandar with a phone in one hand and a cloth
-          piece in the other.
+          Built for anyone who wants to look better, waste less, and actually
+          love what's in their closet.
         </span>
       </div>
       <div className="grid w-full grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-3">

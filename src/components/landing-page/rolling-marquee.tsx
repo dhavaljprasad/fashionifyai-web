@@ -2,13 +2,14 @@
 import { Marquee } from "../ui/marquee";
 
 const marqueeItems = [
-  "Indian Body Types",
-  "Custom Design Options",
-  "Amazon Try-On",
-  "Flipkart Try-On",
-  "Cloth Piece Preview",
-  "WhatsApp Ready Exports",
-  "Mobile first",
+  "Virtual try-on",
+  "Wardrobe styling",
+  "Any product link",
+  "Fabric to fit",
+  "Outfit remixes",
+  "10-second reenders",
+  "Every body type",
+  "Shop-ready exports",
 ];
 
 export const LandingPageRollingMarquee = () => {

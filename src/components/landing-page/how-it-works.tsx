@@ -1,5 +1,5 @@
 "use client";
-import { Link, Shirt, PenLine } from "lucide-react";
+import { Link, Shirt, PenLine, Scissors } from "lucide-react";
 
 const howItWorksData = [
   {
@@ -16,10 +16,18 @@ const howItWorksData = [
     heading: "Upload unstitched fabric.",
     description:
       "Snap the cloth, snap the body. AI stitches a realistic preview in 10 seconds kurta, suit, lehenga, blouse.",
-    Icon: Shirt,
+    Icon: Scissors,
   },
   {
     step: "Usecase 03",
+    label: "STYLE",
+    heading: "Let AI remix your wardrobe.",
+    description:
+      "Snap what you own. Get outfit combos for date night, the office, or Sunday brunch — in seconds.",
+    Icon: Shirt,
+  },
+  {
+    step: "Usecase 04",
     label: "DESIGN",
     heading: "Draw or describe changes.",
     description:
@@ -36,10 +44,10 @@ export const LandingPageHowItWorks = ({ id }: { id?: string }) => {
     >
       <span className="text-xs font-semibold text-text">THE FLOW</span>
       <h1 className="text-center text-6xl font-bold text-text">
-        One linear flow. <span className="text-accent">Three use cases.</span>
+        One linear flow. <span className="text-accent">Four use cases.</span>
       </h1>
       <span className="text-center text-sm text-text">
-        Stop at step one or go all the way to step three. The deeper you go, the
+        Stop at step one or go all the way to step four. The deeper you go, the
         better the result. No learning curve.
       </span>
       <div className="flex h-auto w-full flex-col items-center items-stretch justify-center md:flex-row">

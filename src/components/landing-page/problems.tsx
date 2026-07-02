@@ -4,23 +4,23 @@ import { EyeOff, Link2Off, Scissors } from "lucide-react";
 const problems = [
   {
     index: "01",
-    title: "Customers can't visualize",
+    title: "You can't picture the fit",
     description:
-      "They hold a cloth piece, squint, and ask 'kaisa lagega?' the sale walks out the door.",
+      "Product photos live on other bodies. Fabric swatches say nothing. You buy, you doubt, you return.",
     Icon: EyeOff,
   },
   {
     index: "02",
-    title: "No previews from online links",
+    title: "Your wardrobe is a mystery",
     description:
-      "Amazon and Flipkart photos are on models, not on the customer standing in front of you.",
+      "Half your closet stays untouched. You wear the same five outfits because pairing new looks is hard.",
     Icon: Link2Off,
   },
   {
     index: "03",
-    title: "No previews from online links",
+    title: "Returns cost everyone",
     description:
-      "Amazon and Flipkart photos are on models, not on the customer standing in front of you.",
+      "1 in 4 online fashion orders gets returned. Time, money, and the planet all pay the price.",
     Icon: Scissors,
   },
 ];
@@ -35,13 +35,12 @@ export const LandingPageProblems = ({ id }: { id?: string }) => {
         <span className="text-xs font-semibold text-text">THE REALITY</span>
 
         <h1 className="text-6xl font-bold text-text">
-          Tailors & cloth sellers face{" "}
-          <span className="text-accent">3 big problems.</span>
+          Shopping Fashion is <span className="text-accent">still broken.</span>
         </h1>
 
         <span className="text-sm text-text">
-          I've spent years in my mom's boutique since childhood. The same
-          pattern came up again and again.
+          We talked to shoppers, stylists and tailors from New York to Tokyo &
+          Dublin to Delhi. The same three frustrations came up everywhere.
         </span>
       </div>
       <div className="flex w-auto flex-col items-center items-stretch justify-center gap-1 md:flex-row">

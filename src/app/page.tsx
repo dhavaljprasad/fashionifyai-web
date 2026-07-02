@@ -11,6 +11,7 @@ import { LandingPagePricing } from "@/components/landing-page/pricing";
 import { LandingPageTestimonials } from "@/components/landing-page/testimonials";
 import { LandingPageHeroFooter } from "@/components/landing-page/hero-footer";
 import { LandingPageFooter } from "@/components/landing-page/footer";
+import { LandingPageWardrobe } from "@/components/landing-page/wardrobe";
 
 const navItems = [
   {
@@ -20,6 +21,10 @@ const navItems = [
   {
     label: "How it works",
     href: "#how-it-works",
+  },
+  {
+    label: "AI Stylist",
+    href: "#ai-stylist",
   },
   {
     label: "Features",
@@ -39,6 +44,7 @@ export default function Home() {
       <LandingPageRollingMarquee />
       <LandingPageProblems id="problems" />
       <LandingPageHowItWorks id="how-it-works" />
+      <LandingPageWardrobe id="ai-stylist" />
       <LandingPageFeatures id="features" />
       <LandingPagePricing id="pricing" />
       <LandingPageTestimonials />

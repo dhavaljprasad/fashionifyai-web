@@ -16,9 +16,9 @@ export const LandingPageHero = () => {
   const heroPreview = [
     {
       text: "Case I",
-      type: "Dress to Customer",
+      type: "Dress to Model",
       details:
-        "Customer uploads a photo and drops a link or dress image. FashionifyAI previews the finished outfit on the customer under 10 seconds.",
+        "User uploads a photo and drops a link or dress image. FashionifyAI previews the finished outfit on the customer under 10 seconds.",
       customerPhoto:
         "https://res.cloudinary.com/dli14hm5i/image/upload/v1777036476/beautiful-woman-purple-sweater-skirt_e9bdwh.jpg",
       dressPhoto:
@@ -29,9 +29,9 @@ export const LandingPageHero = () => {
     },
     {
       text: "Case II",
-      type: "Cloth to Customer",
+      type: "Unstiched to Model",
       details:
-        "Customer uploads a photo and drops a cloth piece. FashionifyAI previews the finished outfit on the customer under 10 seconds.",
+        "User uploads a photo and drops a cloth piece. FashionifyAI previews the finished outfit on the customer under 10 seconds.",
       customerPhoto:
         "https://res.cloudinary.com/dli14hm5i/image/upload/v1777036476/beautiful-woman-purple-sweater-skirt_e9bdwh.jpg",
       dressPhoto:
@@ -52,17 +52,17 @@ export const LandingPageHero = () => {
 
   return (
     <div className="flex h-fit w-full flex-col  items-start justify-between gap-4 px-4 sm:px-16 lg:flex-row lg:items-center">
-      <div className="flex h-screen w-full flex-col items-start justify-center gap-4 lg:max-w-2xl">
+      <div className="flex h-screen w-full flex-col items-start justify-center gap-4 lg:max-w-3xl">
         <div className="flex items-center justify-center gap-2 bg-background-secondary px-2 py-1">
           <div className="h-1 w-1 bg-accent" />
           <span className="text-xs font-semibold text-text">
-            Made for Indian Body types
+            AI wardrobe stylist & visualizer in your pocket
           </span>
         </div>
         <div className="flex flex-col items-start justify-center gap-2">
-          <h1 className="text-6xl font-bold text-text">Try before</h1>
+          <h1 className="text-6xl font-bold text-text">Style what you own.</h1>
           <div className="flex items-center justify-center gap-2">
-            <h1 className="text-6xl font-bold text-text">you</h1>
+            <h1 className="text-6xl font-bold text-text">See it before you</h1>
             <WordRotate
               words={["Buy.", "Stitch.", "Style."]}
               className="text-6xl font-bold text-accent"
@@ -70,9 +70,10 @@ export const LandingPageHero = () => {
           </div>
         </div>
         <span className="text-sm text-text">
-          Upload a photo and Drop an Amazon / Flipkart link or a cloth piece.
-          FashionifyAI previews the finished outfit on your customer in 10
-          seconds, built for cloth sellers, tailors, and every-day styling.
+          FashionifyAI is your AI wardrobe stylist and visualization studio.
+          Snap the clothes you already own, get outfit combinations for any
+          occasion. Try on new pieces from any store, online or offline, before
+          you buy.
         </span>
         <div className="flex items-start justify-center gap-4">
           {/* {user ? (
