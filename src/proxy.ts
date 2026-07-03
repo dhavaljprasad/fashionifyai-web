@@ -21,11 +21,13 @@ function isTokenValid(token: string | null): boolean {
   }
 }
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   const token = req.cookies.get(COOKIE_NAME)?.value ?? null;
   const isAuthenticated = isTokenValid(token);
+
+  console.log(isAuthenticated, "authenticated", pathname);
 
   // Protected routes
   if (pathname.startsWith("/app") && !isAuthenticated) {
