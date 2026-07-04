@@ -1,12 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ButtonPrimary } from "../modular/button";
 
 import { Menu, X } from "lucide-react";
 import { useAuth } from "@/app/providers/auth";
 
-export const AppPageHeader = ({
+export const Header = ({
   showSidebar,
   setShowSidebar,
 }: {
