@@ -27,8 +27,6 @@ export function proxy(req: NextRequest) {
   const token = req.cookies.get(COOKIE_NAME)?.value ?? null;
   const isAuthenticated = isTokenValid(token);
 
-  console.log(isAuthenticated, "authenticated", pathname);
-
   // Protected routes
   if (pathname.startsWith("/app") && !isAuthenticated) {
     return NextResponse.redirect(new URL("/", req.url));
