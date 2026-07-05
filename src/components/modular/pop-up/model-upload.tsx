@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { upload } from "@imagekit/next";
 import { useAuth } from "@/app/providers/auth";
 import { api } from "@/lib/api";
-import { Check, X, Images } from "lucide-react";
+import { X, Images } from "lucide-react";
 import { ButtonPrimary } from "@/components/modular/button";
 
 const NEXT_PUBLIC_IMGKIT_PUBLIC_KEY =
@@ -84,6 +84,7 @@ export const ModelUploadPopUp = ({}) => {
   const [capturedImage, setCapturedImage] = useState<string>("");
   const [uploading, setUploading] = useState(false);
   const [gender, setGender] = useState<Gender>("male");
+  const [name, setName] = useState<string>("");
   const [maleMeasurements, setMaleMeasurements] = useState<
     Record<string, string>
   >({
@@ -247,14 +248,11 @@ export const ModelUploadPopUp = ({}) => {
 
   const onConfirmImage = async () => {
     try {
-      if (uploading) return;
-      setUploading(true);
       const convRes = await api.get("/api/conversation/init");
 
       if (convRes.status === 200) {
-        const conversation_id = convRes.data.conversation_id;
         const { token, expire, signature } = convRes.data.imgkit_auth;
-        const file_name = "user_image.webp";
+        const file_name = "user_model.webp";
 
         // uploading image
         const res = await fetch(capturedImage);
@@ -267,33 +265,48 @@ export const ModelUploadPopUp = ({}) => {
           publicKey: NEXT_PUBLIC_IMGKIT_PUBLIC_KEY,
           file: blob,
           fileName: file_name,
-          folder: `/${user?.id}/uploads/${conversation_id}`,
-          useUniqueFileName: false,
+          folder: `/${user?.id}/uploads/models/`,
+          useUniqueFileName: true,
         });
 
-        // saving the uploaded image to the conversation
-        try {
-          const saveMsgRes = await api.post(
-            "/api/conversation/save-user-image",
-            {
-              new: true,
-              conversation_id: conversation_id,
-              file_name: uploadResponse.name,
-            },
-          );
-          if (saveMsgRes.data.saved) {
-            // router.push(`/${conversation_id}`);
-          }
-        } catch (e) {
-          throw e;
-        }
+        return uploadResponse.name;
       }
-      setUploading(false);
     } catch (e) {
       console.log(
         "Unexpected error occured uploading the image and geting conversation_id as",
         e,
       );
+    }
+  };
+
+  const handleMeasurementChange = (key: string, value: string) => {
+    if (gender === "male") {
+      setMaleMeasurements((prev) => ({ ...prev, [key]: value }));
+    } else {
+      setFemaleMeasurements((prev) => ({ ...prev, [key]: value }));
+    }
+  };
+
+  const handleSave = async () => {
+    if (!isFormComplete) return;
+    if (uploading) return;
+    try {
+      setUploading(true);
+      const payload = gender === "male" ? maleMeasurements : femaleMeasurements;
+
+      const image = await onConfirmImage();
+
+      const saveRes = await api.post("/api/model/init", {
+        gender: gender,
+        image: image,
+        model_name: name,
+        measurements: payload,
+      });
+
+      console.log("Saving model data", saveRes.data);
+      setUploading(false);
+    } catch (e) {
+      console.log("Unexpected error occured as: ", e);
       setUploading(false);
     }
   };
@@ -306,22 +319,12 @@ export const ModelUploadPopUp = ({}) => {
     gender === "male" ? maleMeasurementFields : femaleMeasurementFields;
   const currentMeasurements =
     gender === "male" ? maleMeasurements : femaleMeasurements;
-
-  const handleMeasurementChange = (key: string, value: string) => {
-    if (gender === "male") {
-      setMaleMeasurements((prev) => ({ ...prev, [key]: value }));
-    } else {
-      setFemaleMeasurements((prev) => ({ ...prev, [key]: value }));
-    }
-  };
-
-  const handleSave = () => {
-    const payload = gender === "male" ? maleMeasurements : femaleMeasurements;
-    console.log("Saving model data", {
-      gender,
-      ...payload,
-    });
-  };
+  const isFormComplete =
+    Boolean(name.trim()) &&
+    Boolean(capturedImage) &&
+    measurementFields.every((field) =>
+      Boolean(currentMeasurements[field.key]?.toString().trim()),
+    );
 
   return (
     <div className="flex h-full w-full flex-col items-center gap-4 sm:flex-row sm:items-start sm:justify-start">
@@ -393,6 +396,8 @@ export const ModelUploadPopUp = ({}) => {
               type="text"
               className="w-full border border-border bg-background-primary p-2 text-text placeholder:text-text/50 focus:outline-none focus:ring-1 focus:ring-accent"
               placeholder="Model name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
           </div>
 
@@ -462,7 +467,13 @@ export const ModelUploadPopUp = ({}) => {
             </div>
 
             <div className="mt-4 flex w-full justify-end">
-              <ButtonPrimary text="Save" onClick={handleSave} />
+              <ButtonPrimary
+                text="Save"
+                onClick={handleSave}
+                buttonClass={
+                  isFormComplete ? "" : "pointer-events-none opacity-50"
+                }
+              />
             </div>
           </div>
         </div>
