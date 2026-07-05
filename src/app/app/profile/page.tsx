@@ -1,17 +1,29 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, BadgeCheck, Mail, UserRound } from "lucide-react";
 import { useAuth } from "@/app/providers/auth";
 import { ButtonPrimary } from "@/components/modular/button";
 import { Separator } from "@/components/ui/separator";
+import { PopUp } from "@/components/modular/pop-up";
+import { ModelUploadPopUp } from "@/components/modular/pop-up/model-upload";
 
 function Page() {
+  const [showPopUp, setShowPopUp] = useState(true);
   const router = useRouter();
   const { user } = useAuth();
 
   return (
-    <div className="flex min-h-screen w-full flex-col p-4 sm:px-16">
+    <div className="relative flex min-h-screen w-full flex-col p-4 sm:px-16">
+      {showPopUp && (
+        <PopUp
+          size="large"
+          header="Profile Information"
+          closePopUp={() => setShowPopUp(false)}
+          component={<ModelUploadPopUp />}
+        />
+      )}
       <ButtonPrimary
         text="Back"
         onClick={() => router.back()}
