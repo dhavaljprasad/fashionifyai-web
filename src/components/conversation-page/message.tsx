@@ -1,0 +1,50 @@
+"use client";
+
+import { ConversationData } from "../../app/app/visualizer/[conversation_id]/page";
+
+type MessagesBoxProps = {
+  data: ConversationData;
+  showImageViewer: (images: string[]) => void;
+};
+
+export const MessagesBox = ({ data, showImageViewer }: MessagesBoxProps) => {
+  return (
+    <div
+      className={`flex h-auto w-full flex-col gap-2 ${data.role === "user" ? "items-end" : "items-start"} justify-center`}
+    >
+      {/* images block  */}
+      {data.images && data.images.length > 0 && (
+        <div
+          className={`relative mt-4 flex w-full ${data.role === "user" ? "justify-end" : "justify-start"}`}
+          onClick={() => showImageViewer(data.images)}
+        >
+          <div className="relative h-[300px] w-[220px]">
+            {data.images.map((imageUrl, index) => (
+              <img
+                key={index}
+                src={imageUrl}
+                alt={`Image ${index + 1}`}
+                className="absolute top-0 h-full w-full cursor-pointer rounded-2xl object-cover shadow-xl transition-all hover:scale-105"
+                style={{
+                  right: `${index * 12}px`,
+                  transform:
+                    index === 0 ? "rotate(0deg)" : `rotate(-${index * 4}deg)`,
+                  zIndex: data.images.length - index,
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* text block  */}
+      {data.text && (
+        <span
+          className={`max-w-[80%] text-sm break-words ${data.role === "user" ? "bg-background-secondary p-2" : "bg-text p-2 text-background-primary"} `}
+        >
+          {data.text}
+        </span>
+      )}
+    </div>
+  );
+};
