@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { AppPageHeader } from "@/components/app-page/header";
 import { SideBar } from "@/components/modular/side-bar";
+import { ModelCard } from "@/components/modular/model-card";
 import { api } from "@/lib/api";
 import { useAuth } from "../providers/auth";
 import { upload } from "@imagekit/next";
@@ -15,6 +16,7 @@ function AppPage() {
   const [showSidebar, setShowSidebar] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string>("");
   const [recentImages, setRecentImages] = useState<string[]>([]);
+  const [userModels, setUserModels] = useState<any[]>([]); // TODO
   const [uploading, setUploading] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -189,7 +191,7 @@ function AppPage() {
             },
           );
           if (saveMsgRes.data.saved) {
-            router.push(`/${conversation_id}`);
+            router.push(`/app/visualizer/${conversation_id}`);
           }
         } catch (e) {
           throw e;
@@ -210,7 +212,8 @@ function AppPage() {
     try {
       const res = await api.get("/api/app/user-models");
       if (res.status === 200) {
-        setRecentImages(res.data.data);
+        setRecentImages(res.data.data.prev_images);
+        setUserModels(res.data.data.user_models);
       }
     } catch (e) {
       console.log("Error fetching user uploaded images", e);
@@ -229,9 +232,9 @@ function AppPage() {
         setShowSidebar={() => setShowSidebar(!showSidebar)}
       />
       {showSidebar && <SideBar />}
-      <div className="flex h-full w-full flex-col items-center justify-between pt-22 sm:flex-row sm:justify-center sm:gap-4 sm:pt-16">
+      <div className="flex h-full w-full flex-col items-center justify-between pt-22 sm:flex-row sm:justify-center sm:gap-4 sm:pt-24">
         {capturedImage ? (
-          <div className="relative aspect-[2/3] h-fit max-h-[70dvh] sm:max-h-[75dvh]">
+          <div className="relative aspect-[2/3] h-fit max-h-[70dvh] sm:max-h-[90dvh]">
             <img src={capturedImage} className="h-full w-full object-cover" />
             <div
               className={`absolute -bottom-12 flex h-24 w-full items-center justify-around ${uploading ? "opacity-50" : ""}`}
@@ -251,7 +254,7 @@ function AppPage() {
             </div>
           </div>
         ) : (
-          <div className="relative aspect-[2/3] h-fit max-h-[70dvh] sm:max-h-[75dvh] lg:hidden">
+          <div className="relative aspect-[2/3] h-fit max-h-[70dvh] sm:max-h-[100dvh]">
             <video
               ref={videoRef}
               autoPlay
@@ -260,7 +263,7 @@ function AppPage() {
             />
             <div className="absolute -bottom-12 left-1/2 h-24 w-full -translate-x-1/2 flex flex-row items-center justify-evenly">
               <div
-                className=" h-24 w-24  bg-accent"
+                className="h-24 w-24  bg-accent"
                 onClick={() => captureImage()}
               />
               <div
@@ -280,21 +283,22 @@ function AppPage() {
           onChange={handleFile}
         />
 
-        <div className="w-full h-auto flex flex-col items-start justify-center mt-16 gap-2">
-          {recentImages.length > 0 && (
+        <div className="w-full h-auto sm:h-[70dvh] flex flex-col items-start justify-start mt-16 sm:mt-0 gap-2">
+          {userModels.length > 0 && (
             <h1 className="text-center text-sm font-semibold text-text m-0">
               REGISTERED MODELS
             </h1>
           )}
-          {recentImages.length > 0 ? (
-            <div className="scrollbar-thin flex gap-2 overflow-auto scrollbar-thumb-text scrollbar-track-transparent sm:grid sm:h-[50dvh] sm:grid-cols-2 lg:hidden">
-              {recentImages.map((img, index) => (
-                <img
-                  key={index}
-                  src={img}
-                  className="w-20 cursor-pointer object-cover"
-                  onClick={() => setCapturedImage(img)}
-                />
+          {userModels.length > 0 ? (
+            <div className="scrollbar-thin flex gap-2 overflow-auto scrollbar-thumb-text scrollbar-track-transparent">
+              {userModels.map((img, index) => (
+                // <img
+                //   key={index}
+                //   src={img.image_url}
+                //   className="w-20 cursor-pointer object-cover"
+                //   onClick={() => setCapturedImage(img)}
+                // />
+                <ModelCard data={img} key={index} />
               ))}
             </div>
           ) : null}
@@ -304,7 +308,7 @@ function AppPage() {
             </h1>
           )}
           {recentImages.length > 0 ? (
-            <div className="scrollbar-thin flex gap-2 overflow-auto scrollbar-thumb-text scrollbar-track-transparent sm:grid sm:h-[50dvh] sm:grid-cols-2 lg:hidden">
+            <div className="scrollbar-thin flex gap-2 overflow-auto scrollbar-thumb-text scrollbar-track-transparent sm:overlfolow-none sm:flex-wrap">
               {recentImages.map((img, index) => (
                 <img
                   key={index}
