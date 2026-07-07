@@ -72,7 +72,9 @@ export const SideBar = () => {
               <div
                 className={`group flex w-full cursor-pointer items-center justify-start gap-2 p-2 ${conversation_id === item.conversation_id ? "bg-background-primary" : "hover:bg-background-primary"}`}
                 key={index}
-                onClick={() => router.push(`/${item.conversation_id}`)}
+                onClick={() =>
+                  router.push(`/app/visualizer/${item.conversation_id}`)
+                }
               >
                 <span className="text-sm text-text group-hover:text-contrast">
                   {item.title}
