@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { AppPageHeader } from "@/components/app-page/header";
 import { SideBar } from "@/components/modular/side-bar";
-import { ModelCard } from "@/components/modular/model-card";
+import { ModelCard, ModelCardDataType } from "@/components/app-page/model-card";
 import { api } from "@/lib/api";
 import { useAuth } from "../providers/auth";
 import { upload } from "@imagekit/next";
@@ -16,7 +16,8 @@ function AppPage() {
   const [showSidebar, setShowSidebar] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string>("");
   const [recentImages, setRecentImages] = useState<string[]>([]);
-  const [userModels, setUserModels] = useState<any[]>([]); // TODO
+  const [userModels, setUserModels] = useState<ModelCardDataType[]>([]);
+  const [userModelSelected, setUserModelSelected] = useState<boolean>(false);
   const [uploading, setUploading] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -152,6 +153,7 @@ function AppPage() {
     if (uploading) return;
     setCapturedImage("");
     startCamera();
+    setUserModelSelected(false);
   };
 
   const onConfirmImage = async () => {
@@ -182,13 +184,26 @@ function AppPage() {
 
         // saving the uploaded image to the conversation
         try {
+          const selectedModel = userModelSelected
+            ? userModels.find((model) => model.image_url === capturedImage)
+            : undefined;
+
+          const savePayload: {
+            conversation_id: string;
+            file_name: string;
+            message?: string;
+          } = {
+            conversation_id: conversation_id,
+            file_name: uploadResponse.name || "",
+          };
+
+          if (selectedModel) {
+            savePayload.message = selectedModel.model_id;
+          }
+
           const saveMsgRes = await api.post(
             "/api/conversation/save-user-image",
-            {
-              new: true,
-              conversation_id: conversation_id,
-              file_name: uploadResponse.name,
-            },
+            savePayload,
           );
           if (saveMsgRes.data.saved) {
             router.push(`/app/visualizer/${conversation_id}`);
@@ -210,7 +225,7 @@ function AppPage() {
   // load user uploaded and model data
   const getUserUploadedImages = async () => {
     try {
-      const res = await api.get("/api/app/user-models");
+      const res = await api.get("/api/app/models-and-images");
       if (res.status === 200) {
         setRecentImages(res.data.data.prev_images);
         setUserModels(res.data.data.user_models);
@@ -218,6 +233,12 @@ function AppPage() {
     } catch (e) {
       console.log("Error fetching user uploaded images", e);
     }
+  };
+
+  // on click of user model
+  const userModelSelectionFunc = (img_url: string) => {
+    setCapturedImage(img_url);
+    setUserModelSelected(true);
   };
 
   useEffect(() => {
@@ -292,13 +313,11 @@ function AppPage() {
           {userModels.length > 0 ? (
             <div className="scrollbar-thin flex gap-2 overflow-auto scrollbar-thumb-text scrollbar-track-transparent">
               {userModels.map((img, index) => (
-                // <img
-                //   key={index}
-                //   src={img.image_url}
-                //   className="w-20 cursor-pointer object-cover"
-                //   onClick={() => setCapturedImage(img)}
-                // />
-                <ModelCard data={img} key={index} />
+                <ModelCard
+                  data={img}
+                  key={index}
+                  selectImage={() => userModelSelectionFunc(img.image_url)}
+                />
               ))}
             </div>
           ) : null}
