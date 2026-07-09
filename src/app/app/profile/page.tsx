@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, BadgeCheck, Mail, UserRound } from "lucide-react";
 import { useAuth } from "@/app/providers/auth";
@@ -8,20 +8,106 @@ import { ButtonPrimary } from "@/components/modular/button";
 import { Separator } from "@/components/ui/separator";
 import { PopUp } from "@/components/modular/pop-up";
 import { ModelUploadPopUp } from "@/components/modular/pop-up/model-upload";
+import { ModelCard } from "../../../components/profile/model-card";
+import { ModelRenderPopUp } from "@/components/modular/pop-up/model-render";
+import { api } from "@/lib/api";
+
+type MaleMeasurements = {
+  height: number;
+  body_type:
+    | "SLIM"
+    | "REGULAR"
+    | "ATHLETIC"
+    | "MUSCULAR"
+    | "BROAD"
+    | "HEAVYSET";
+  shoulder_width: number;
+  chest: number;
+  waist: number;
+  belly: number;
+  hips: number;
+  pant_waist: number;
+  thigh: number;
+};
+
+type FemaleMeasurements = {
+  height: number;
+  body_shape:
+    | "HOURGLASS"
+    | "PEAR"
+    | "APPLE"
+    | "RECTANGLE"
+    | "INVERTED_TRIANGLE";
+  shoulder_width: number;
+  bust: number;
+  underbust: number;
+  waist: number;
+  hips: number;
+  pant_waist: number;
+  thigh: number;
+};
+
+type ModelDataType = {
+  model_id: string;
+  name: string;
+  gender: "male" | "female";
+  image_url: string;
+  measurements: MaleMeasurements | FemaleMeasurements;
+};
 
 function Page() {
-  const [showPopUp, setShowPopUp] = useState(true);
+  const [showPopUp, setShowPopUp] = useState<boolean>(false);
+  const [newModelPopUp, setNewModelPopUp] = useState<boolean>(false);
+  const [models, setModels] = useState<ModelDataType[]>([]);
+  const [popUpModelData, setPopUpModelData] = useState<ModelDataType | null>(
+    null,
+  );
   const router = useRouter();
   const { user } = useAuth();
+
+  const openNewModelUploadPopUp = () => {
+    setNewModelPopUp(true);
+    setShowPopUp(true);
+  };
+
+  const openUserModelPopUp = (model_id: string) => {
+    const selectedModel =
+      models.find((model) => model.model_id === model_id) ?? null;
+    setPopUpModelData(selectedModel);
+    setNewModelPopUp(false);
+    setShowPopUp(true);
+  };
+
+  const getUserModels = async () => {
+    try {
+      const models = await api.get("/api/model");
+      setModels(models.data.models);
+    } catch (e) {
+      console.log("Unexpected error occured getting user models");
+    }
+  };
+
+  useEffect(() => {
+    getUserModels();
+  }, []);
 
   return (
     <div className="relative flex min-h-screen w-full flex-col p-4 sm:px-16">
       {showPopUp && (
         <PopUp
           size="large"
-          header="Profile Information"
+          header={`${newModelPopUp ? "New Model" : "Model"}`}
           closePopUp={() => setShowPopUp(false)}
-          component={<ModelUploadPopUp />}
+          component={
+            newModelPopUp ? (
+              <ModelUploadPopUp onClose={() => setShowPopUp(false)} />
+            ) : popUpModelData ? (
+              <ModelRenderPopUp
+                data={popUpModelData}
+                onClose={() => setShowPopUp(false)}
+              />
+            ) : null
+          }
         />
       )}
       <ButtonPrimary
@@ -92,11 +178,19 @@ function Page() {
               </h1>
               <ButtonPrimary
                 text="Upload New Model"
-                onClick={() => router.push("/app/upload-model")}
+                onClick={() => openNewModelUploadPopUp()}
               />
             </div>
 
-            <div className="w-full h-auto flex gap-4 flex-wrap"></div>
+            <div className="w-full h-auto grid gap-2 grid-cols-1 sm:grid-cols-2">
+              {models.map((item, index) => (
+                <ModelCard
+                  data={item}
+                  key={index}
+                  onClick={openUserModelPopUp}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </div>
