@@ -2,7 +2,6 @@
 
 export type ModelCardDataType = {
   name: string;
-  model_name: string;
   gender: string;
   image_url: string;
   model_id: string;
