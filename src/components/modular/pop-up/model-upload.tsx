@@ -80,7 +80,7 @@ const femaleMeasurementFields: MeasurementField[] = [
   { key: "thigh", label: "Thigh", type: "number", placeholder: "52" },
 ];
 
-export const ModelUploadPopUp = ({}) => {
+export const ModelUploadPopUp = ({ onClose }: { onClose: () => void }) => {
   const [capturedImage, setCapturedImage] = useState<string>("");
   const [uploading, setUploading] = useState(false);
   const [gender, setGender] = useState<Gender>("male");
@@ -305,9 +305,11 @@ export const ModelUploadPopUp = ({}) => {
 
       console.log("Saving model data", saveRes.data);
       setUploading(false);
+      onClose();
     } catch (e) {
       console.log("Unexpected error occured as: ", e);
       setUploading(false);
+      onClose();
     }
   };
 
