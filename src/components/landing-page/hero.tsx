@@ -53,7 +53,7 @@ export const LandingPageHero = () => {
         </div>
         <div className="flex flex-col items-start justify-center gap-2">
           <h1 className="text-6xl font-bold text-text">Style what you own.</h1>
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex flex-col items-start justify-center gap-2 sm:flex-row sm:items-center">
             <h1 className="text-6xl font-bold text-text">See it before you</h1>
             <WordRotate
               words={["Buy.", "Stitch.", "Style."]}
