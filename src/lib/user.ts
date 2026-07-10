@@ -7,6 +7,8 @@ export type UserType = {
   image_url: string;
   name: string;
   type_of_user: string;
+  bussiness_name?: string;
+  bussiness_address?: string;
 };
 
 export async function getCurrentUser(): Promise<UserType | null> {
