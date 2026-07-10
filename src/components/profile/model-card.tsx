@@ -1,11 +1,10 @@
 "use client";
+import type { ModelDataType } from "./models-section";
 
-type ModelCardType = {
-  name: string;
-  model_id: string;
-  image_url: string;
-  gender: "male" | "female";
-};
+type ModelCardType = Pick<
+  ModelDataType,
+  "name" | "model_id" | "image_url" | "gender"
+>;
 
 export const ModelCard = ({
   data,
