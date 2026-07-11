@@ -11,6 +11,7 @@ type ConversationHistoryItem = {
   conversation_id: string;
   entry_type: string;
   title: string;
+  conversation_type: string;
 };
 
 export const SideBar = () => {
@@ -29,7 +30,7 @@ export const SideBar = () => {
     },
     {
       label: "Gallery",
-      onClick: () => router.push("/gallery"),
+      onClick: () => router.push("/app/gallery"),
       icon: Images,
     },
   ];
@@ -70,7 +71,7 @@ export const SideBar = () => {
           history.map((item, index) => {
             return (
               <div
-                className={`group flex w-full cursor-pointer items-center justify-start gap-2 p-2 ${conversation_id === item.conversation_id ? "bg-background-primary" : "hover:bg-background-primary"}`}
+                className={`group flex w-full cursor-pointer items-center justify-between gap-2 p-2 ${conversation_id === item.conversation_id ? "bg-background-primary" : "hover:bg-background-primary"}`}
                 key={index}
                 onClick={() =>
                   router.push(`/app/visualizer/${item.conversation_id}`)
@@ -78,6 +79,9 @@ export const SideBar = () => {
               >
                 <span className="text-sm text-text group-hover:text-contrast">
                   {item.title}
+                </span>
+                <span className="p-2 bg-background-primary text-accent text-xs">
+                  {item.conversation_type}
                 </span>
               </div>
             );
@@ -92,7 +96,7 @@ export const SideBar = () => {
       {user ? (
         <div
           className="flex h-auto w-full cursor-pointer gap-2 p-4 hover:bg-background-primary"
-          onClick={() => router.push("/profile")}
+          onClick={() => router.push("/app/profile")}
         >
           <img
             src={user.image_url}
@@ -104,7 +108,7 @@ export const SideBar = () => {
           </div>
         </div>
       ) : (
-        <ButtonSecondary text="Sign-In" />
+        <ButtonSecondary text="Sign-In" onClick={() => router.push("/auth")} />
       )}
     </div>
   );
