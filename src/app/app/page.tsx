@@ -167,7 +167,7 @@ function AppPage() {
     try {
       if (uploading) return;
       setUploading(true);
-      const convRes = await api.get("/api/conversation/init");
+      const convRes = await api.get("/api/conversation/visualization/init");
 
       if (convRes.status === 200) {
         const conversation_id = convRes.data.conversation_id;
