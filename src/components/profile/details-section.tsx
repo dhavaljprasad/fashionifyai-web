@@ -55,9 +55,9 @@ export const DetailsSection = () => {
     : user?.type_of_user !== "independent";
 
   return (
-    <div className="flex w-full flex-col items-start justify-start">
+    <div className="flex w-full flex-col gap-4 items-start justify-start">
       <div className="flex w-full items-center justify-between">
-        <h1 className="text-2xl text-contrast font-semibold pb-2">Details</h1>
+        <h1 className="text-2xl text-contrast font-semibold">Details</h1>
         {editing ? (
           <ButtonSecondary text="Update" onClick={onUpdateAccountDetails} />
         ) : (
