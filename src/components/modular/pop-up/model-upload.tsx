@@ -248,7 +248,7 @@ export const ModelUploadPopUp = ({ onClose }: { onClose: () => void }) => {
 
   const onConfirmImage = async () => {
     try {
-      const convRes = await api.get("/api/conversation/init");
+      const convRes = await api.get("/api/model/img-upload");
 
       if (convRes.status === 200) {
         const { token, expire, signature } = convRes.data.imgkit_auth;
