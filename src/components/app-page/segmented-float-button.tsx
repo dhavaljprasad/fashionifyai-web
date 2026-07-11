@@ -23,7 +23,7 @@ export const SegmentedFloatingButton = ({
   onChange,
 }: SegmentedFloatingButtonProps) => {
   return (
-    <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center bg-background-secondary  shadow-lg">
+    <div className="fixed bottom-8 sm:bottom-12 left-1/2 -translate-x-1/2 flex items-center bg-background-secondary  shadow-lg">
       {options.map((option) => {
         const isSelected = selected === option.value;
 
