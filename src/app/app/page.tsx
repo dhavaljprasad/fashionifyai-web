@@ -10,6 +10,7 @@ import { useAuth } from "../providers/auth";
 import { upload } from "@imagekit/next";
 import { Check, X, Images } from "lucide-react";
 import { CreativeInputBox } from "@/components/app-page/creative-input";
+import { getRandomGreeting } from "@/utils/greetings";
 
 const NEXT_PUBLIC_IMGKIT_PUBLIC_KEY =
   process.env.NEXT_PUBLIC_IMGKIT_PUBLIC_KEY || "";
@@ -29,6 +30,7 @@ function AppPage() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { user } = useAuth();
+  const { line, end } = getRandomGreeting();
   const router = useRouter();
 
   // camera functions
@@ -246,6 +248,13 @@ function AppPage() {
     setUserModelSelected(true);
   };
 
+  const onSwitchTabs = (tab: "visualization" | "ai stylist") => {
+    setActiveSection(tab);
+    if (tab == "visualization") {
+      startCamera();
+    }
+  };
+
   useEffect(() => {
     startCamera();
     getUserUploadedImages();
@@ -344,18 +353,18 @@ function AppPage() {
                 ))}
               </div>
             ) : null}
+            <div className="w-full h-24 sm:hidden" />
           </div>
         </div>
       ) : (
-        <div className="flex h-full w-full flex items-center justify-center pt-22 sm:pt-24">
-          <CreativeInputBox />
+        <div className="flex h-screen w-full flex flex-col gap-4 items-center justify-center">
+          <h1 className="text-4xl text-center font-semibold">{`${line}, ${user?.name}${end}`}</h1>
+          <CreativeInputBox modelsData={userModels} />
         </div>
       )}
       <SegmentedFloatingButton
         selected={activeSection}
-        onChange={(n: string) =>
-          setActiveSection(n as "visualization" | "ai stylist")
-        }
+        onChange={(n: "visualization" | "ai stylist") => onSwitchTabs(n)}
       />
     </div>
   );
