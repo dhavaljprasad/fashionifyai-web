@@ -1,17 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  ArrowLeft,
-  Info,
-  BadgeCheck,
-  Mail,
-  Users,
-  Shirt,
-  CalendarSync,
-  Cog,
-} from "lucide-react";
+import { ArrowLeft, Info, Users, Shirt, CalendarSync, Cog } from "lucide-react";
 import { useAuth } from "@/app/providers/auth";
 import { ButtonPrimary } from "@/components/modular/button";
 import { PopUp } from "@/components/modular/pop-up";
