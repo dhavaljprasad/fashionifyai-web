@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ButtonPrimary } from "../modular/button";
+import { InstallButton } from "../modular/button";
 
 import { Menu, X } from "lucide-react";
 import { useAuth } from "@/app/providers/auth";
@@ -34,12 +34,7 @@ export const AppPageHeader = ({
       </div>
       {user ? (
         <div className="flex items-center justify-center gap-4">
-          {/* {isInstalled || !canInstall ? null : (
-            <ButtonPrimary
-              text="Download App"
-              onClick={() => handleInstall()}
-            />
-          )} */}
+          <InstallButton />
           <div
             className="h-10 w-10 cursor-pointer overflow-hidden border border-accent"
             onClick={() => router.push("/app/profile")}
