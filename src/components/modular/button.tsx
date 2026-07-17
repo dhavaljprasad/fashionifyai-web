@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { LucideIcon } from "lucide-react";
 import { usePWA } from "@/hooks/use-pwa";
 import { Platform } from "@/utils/pwa/types";
-import IOSInstallModal from "./iOS-install-modal";
+import IOSInstallModal from "./ios-install-modal";
 
 export const ButtonPrimary = ({
   text,
