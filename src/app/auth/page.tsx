@@ -16,6 +16,9 @@ function AuthPage() {
         <div className="w-full flex items-center justify-center mt-4">
           <GoogleSignInButton />
         </div>
+        <span className="text-xs text-contrast">
+          Please refresh if Google Auth button is not visible
+        </span>
         <div>
           <span className="text-xs lg:text-sm">
             By continuing you agree to FashionifyAI's{" "}
@@ -25,7 +28,7 @@ function AuthPage() {
             >
               Terms
             </span>{" "}
-            and
+            and{" "}
             <span
               className="text-accent hover:underline cursor-pointer"
               onClick={() => router.push("/privacy-policy")}
