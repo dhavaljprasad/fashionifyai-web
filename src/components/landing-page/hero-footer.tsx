@@ -39,7 +39,7 @@ export const LandingPageHeroFooter = () => {
           />
         )}
 
-        <ButtonSecondary text="See Demo" icon={Play} />
+        <ButtonSecondary text="See Demo" icon={Play} onClick={() => {}} />
       </div>
     </div>
   );

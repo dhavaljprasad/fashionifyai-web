@@ -72,6 +72,7 @@ export const LandingPagePricing = ({ id }: { id?: string }) => {
                 buttonClass="w-full"
                 buttonTextClass="text-xl"
                 icon={ArrowRight}
+                onClick={() => {}}
               />
             ) : (
               <ButtonPrimary

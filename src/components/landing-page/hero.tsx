@@ -82,7 +82,7 @@ export const LandingPageHero = () => {
             />
           )}
 
-          <ButtonSecondary text="See Demo" icon={Play} />
+          <ButtonSecondary text="See Demo" icon={Play} onClick={() => {}} />
         </div>
       </div>
       <div className="flex h-full w-full flex-col items-end justify-center gap-4">
