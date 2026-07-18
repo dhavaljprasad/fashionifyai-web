@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-import { Images, PenLine } from "lucide-react";
+import { Images, PenLine, Scale } from "lucide-react";
 import { ButtonPrimary, ButtonSecondary } from "./button";
 import { api } from "@/lib/api";
 import { useAuth } from "@/app/providers/auth";
@@ -32,6 +32,11 @@ export const SideBar = () => {
       label: "Gallery",
       onClick: () => router.push("/app/gallery"),
       icon: Images,
+    },
+    {
+      label: "Price Compare",
+      onClick: () => router.push("/app/price-compare"),
+      icon: Scale,
     },
   ];
 
