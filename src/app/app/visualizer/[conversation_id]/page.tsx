@@ -9,6 +9,7 @@ import { TryOnComponent } from "@/components/conversation-page/try-on";
 import { SeeOnComponent } from "@/components/conversation-page/see-on";
 import { DressUpComponent } from "@/components/conversation-page/dress-up";
 import { ImageViewer } from "@/components/conversation-page/image-viewer";
+import { InputBox } from "@/components/conversation-page/input-box";
 import { api } from "@/lib/api";
 
 export type ConversationData = {
@@ -28,6 +29,7 @@ function ConversationPage() {
   const [poolingId, setPoolingId] = useState("");
   const [showImageViewer, setShowImageViewer] = useState(false);
   const [imageViewerUrls, setImageViewerUrls] = useState<string[]>([]);
+  const [iterationMessage, setIterationMessage] = useState<string>("");
 
   const params = useParams();
   const conversation_id = params.conversation_id as string;
@@ -134,7 +136,7 @@ function ConversationPage() {
         setShowSidebar={() => setShowSidebar(!showSidebar)}
       />
       {showSidebar && <SideBar />}
-      <div className="scrollbar-none flex h-full w-full flex-col items-center justify-start gap-2 overflow-y-auto pt-20">
+      <div className="scrollbar-none flex h-full w-full flex-col items-center justify-start gap-2 overflow-y-auto pt-20 pb-20">
         {conversationData.length > 0 &&
           conversationData.map((item, index) => {
             return (
@@ -168,7 +170,11 @@ function ConversationPage() {
             <Spinner className="ml-2 text-text" />
           </div>
         )}
+
         <div className="h-20" id="auto-scroll" />
+        {conversationData.length <= 6 && (
+          <InputBox value={iterationMessage} setValue={setIterationMessage} />
+        )}
       </div>
     </div>
   );
