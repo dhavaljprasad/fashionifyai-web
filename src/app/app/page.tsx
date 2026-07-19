@@ -270,7 +270,7 @@ function AppPage() {
       {activeSection == "visualization" ? (
         <div className="flex h-full w-full flex-col items-center justify-between pt-22 sm:flex-row sm:justify-center sm:gap-4 sm:pt-24">
           {capturedImage ? (
-            <div className="relative aspect-[2/3] h-fit max-h-[70dvh] sm:max-h-[90dvh]">
+            <div className="relative aspect-[2/3] h-fit max-h-[70dvh] sm:max-h-[100dvh]">
               <img src={capturedImage} className="h-full w-full object-cover" />
               <div
                 className={`absolute -bottom-12 flex h-24 w-full items-center justify-around ${uploading ? "opacity-50" : ""}`}
@@ -297,7 +297,7 @@ function AppPage() {
                 playsInline
                 className="h-full w-full object-cover"
               />
-              <div className="absolute -bottom-12 left-1/2 h-24 w-full -translate-x-1/2 flex flex-row items-center justify-evenly">
+              <div className="absolute -bottom-12 flex h-24 w-full  items-center justify-around">
                 <div
                   className="h-24 w-24  bg-accent"
                   onClick={() => captureImage()}
