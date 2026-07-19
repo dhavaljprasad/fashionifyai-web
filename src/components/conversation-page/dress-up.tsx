@@ -250,10 +250,15 @@ export const DressUpComponent = ({
           folder,
           useUniqueFileName: false,
         });
-        console.log(uploadResponse.url, " link for ", item.for);
         uploadedImages.push(item.for);
         uploadedImagesUrl.push(uploadResponse.url || "");
       }
+
+      const trimmedInstruction = customInstruction?.trim();
+
+      const user_message = `Let's go with ${selectedOutfit}${
+        trimmedInstruction ? ` & Custom Prompt: ${trimmedInstruction}` : ""
+      }`;
 
       try {
         const saveMsgRes = await api.post(
@@ -261,7 +266,7 @@ export const DressUpComponent = ({
           {
             conversation_id: conversation_id,
             file_names: uploadedImages,
-            text: `Let's go with ${selectedOutfit}`,
+            text: user_message,
           },
         );
 
@@ -277,7 +282,7 @@ export const DressUpComponent = ({
             ...prev,
             {
               role: "user",
-              text: `Let's go with ${selectedOutfit}`,
+              text: user_message,
               images: uploadedImagesUrl,
             },
           ]);
