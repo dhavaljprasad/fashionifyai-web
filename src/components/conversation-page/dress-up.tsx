@@ -250,7 +250,9 @@ export const DressUpComponent = ({
           folder,
           useUniqueFileName: false,
         });
-        uploadedImages.push(item.for);
+        uploadedImages.push(
+          (uploadResponse?.name || "").replace(/\.webp$/i, ""),
+        );
         uploadedImagesUrl.push(uploadResponse.url || "");
       }
 
