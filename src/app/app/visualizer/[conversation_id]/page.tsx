@@ -86,17 +86,23 @@ function ConversationPage() {
     const interval = setInterval(async () => {
       try {
         const res = await api.get(`/api/pooling/${poolingId}`);
-        console.log(res.data, "pooling res");
 
         if (res.data.status === "completed") {
-          setConversationData((prev) => [
-            ...prev,
-            {
-              role: "ai",
-              text: res.data.data.text,
-              images: [res.data.data.see_on_image_url],
-            },
-          ]);
+          if (conversationData.length < 6) {
+            setConversationData((prev) => [
+              ...prev,
+              {
+                role: "ai",
+                text: res.data.data.text,
+                images: [res.data.data.see_on_image_url],
+              },
+            ]);
+          } else {
+            setConversationData((prev) => [
+              ...prev,
+              res.data.data.iteration_result,
+            ]);
+          }
           clearInterval(interval);
           setPoolingId("");
         }
@@ -172,8 +178,13 @@ function ConversationPage() {
         )}
 
         <div className="h-20" id="auto-scroll" />
-        {conversationData.length <= 6 && (
-          <InputBox value={iterationMessage} setValue={setIterationMessage} />
+        {conversationData.length >= 6 && (
+          <InputBox
+            value={iterationMessage}
+            setValue={setIterationMessage}
+            setPooling={setPoolingId}
+            setConversationData={setConversationData}
+          />
         )}
       </div>
     </div>
