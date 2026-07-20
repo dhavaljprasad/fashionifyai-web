@@ -10,12 +10,12 @@ type MessagesBoxProps = {
 export const MessagesBox = ({ data, showImageViewer }: MessagesBoxProps) => {
   return (
     <div
-      className={`flex h-auto w-full flex-col gap-2 ${data.role === "user" ? "items-end" : "items-start"} justify-center`}
+      className={`flex h-auto w-full flex-col gap-2 ${data?.role === "user" ? "items-end" : "items-start"} justify-center`}
     >
       {/* images block  */}
       {data.images && data.images.length > 0 && (
         <div
-          className={`relative mt-4 flex w-full ${data.role === "user" ? "justify-end" : "justify-start"}`}
+          className={`relative mt-4 flex w-full ${data?.role === "user" ? "justify-end" : "justify-start"}`}
         >
           <div
             className="relative h-[300px] w-[220px]"
@@ -42,7 +42,7 @@ export const MessagesBox = ({ data, showImageViewer }: MessagesBoxProps) => {
       {/* text block  */}
       {data.text && (
         <span
-          className={`max-w-[80%] text-sm break-words ${data.role === "user" ? "bg-background-secondary p-2" : "bg-text p-2 text-background-primary"} `}
+          className={`max-w-[80%] text-sm break-words ${data?.role === "user" ? "bg-background-secondary p-2" : "bg-text p-2 text-background-primary"} `}
         >
           {data.text}
         </span>
