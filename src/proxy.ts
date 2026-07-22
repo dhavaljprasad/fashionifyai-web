@@ -37,9 +37,14 @@ export function proxy(req: NextRequest) {
     return NextResponse.redirect(new URL("/app", req.url));
   }
 
+  // Landing page
+  if (pathname === "/" && isAuthenticated) {
+    return NextResponse.redirect(new URL("/app", req.url));
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/app/:path*", "/auth/:path*"],
+  matcher: ["/", "/app/:path*", "/auth/:path*"],
 };
