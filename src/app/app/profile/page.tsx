@@ -10,6 +10,7 @@ import { ModelUploadPopUp } from "@/components/modular/pop-up/model-upload";
 import { ModelRenderPopUp } from "@/components/modular/pop-up/model-render";
 import { SegmentedControlButtons } from "@/components/profile/segmented-control-button";
 import { DetailsSection } from "@/components/profile/details-section";
+import { SettingsSection } from "@/components/profile/settings-section";
 import {
   ModelsSection,
   ModelDataType,
@@ -119,6 +120,8 @@ function Page() {
               setNewModelPopUp={setNewModelPopUp}
               setShowPopUp={setShowPopUp}
             />
+          ) : selectedTab === "Settings" ? (
+            <SettingsSection />
           ) : (
             <></>
           )}
