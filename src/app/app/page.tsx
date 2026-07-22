@@ -8,7 +8,7 @@ import { SegmentedFloatingButton } from "@/components/app-page/segmented-float-b
 import { api } from "@/lib/api";
 import { useAuth } from "../providers/auth";
 import { upload } from "@imagekit/next";
-import { Check, X, Images } from "lucide-react";
+import { Check, X, Images, SwitchCamera } from "lucide-react";
 import { CreativeInputBox } from "@/components/app-page/creative-input";
 import { getRandomGreeting } from "@/utils/greetings";
 
@@ -25,6 +25,8 @@ function AppPage() {
   const [activeSection, setActiveSection] = useState<
     "visualization" | "ai stylist"
   >("visualization");
+  const [rearCameras, setRearCameras] = useState<MediaDeviceInfo[]>([]);
+  const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -34,10 +36,18 @@ function AppPage() {
   const router = useRouter();
 
   // camera functions
-  const startCamera = async () => {
+  const startCamera = async (deviceId?: string) => {
     try {
+      // Stop previous stream
+      if (videoRef.current?.srcObject) {
+        const oldStream = videoRef.current.srcObject as MediaStream;
+        oldStream.getTracks().forEach((track) => track.stop());
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
+        video: deviceId
+          ? { deviceId: { exact: deviceId } }
+          : { facingMode: { ideal: "environment" } },
         audio: false,
       });
 
@@ -92,6 +102,22 @@ function AppPage() {
 
     const image = canvas.toDataURL("image/webp", 0.8);
     setCapturedImage(image);
+  };
+
+  const getRearCameras = async () => {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const rear = devices.filter((device) => device.kind === "videoinput");
+    setRearCameras(rear);
+  };
+
+  const switchCamera = async () => {
+    if (rearCameras.length <= 1) return;
+
+    const nextIndex = (currentCameraIndex + 1) % rearCameras.length;
+
+    await startCamera(rearCameras[nextIndex].deviceId);
+
+    setCurrentCameraIndex(nextIndex);
   };
 
   // file functions
@@ -257,6 +283,7 @@ function AppPage() {
 
   useEffect(() => {
     startCamera();
+    getRearCameras();
     getUserUploadedImages();
   }, []);
 
@@ -297,17 +324,23 @@ function AppPage() {
                 playsInline
                 className="h-full w-full object-cover"
               />
+              <div
+                className="absolute right-6 top-6 flex flex-col items-center bg-accent p-2"
+                onClick={() => switchCamera()}
+              >
+                <SwitchCamera className="text-contrast" />
+              </div>
               <div className="absolute -bottom-12 flex h-24 w-full  items-center justify-around">
-                <div
-                  className="h-24 w-24  bg-accent"
-                  onClick={() => captureImage()}
-                />
                 <div
                   className="h-24 w-24 bg-contrast flex items-center justify-center"
                   onClick={() => inputRef.current?.click()}
                 >
                   <Images className=" text-accent" size={24} />
                 </div>
+                <div
+                  className="h-24 w-24  bg-accent"
+                  onClick={() => captureImage()}
+                />
               </div>
             </div>
           )}

@@ -10,7 +10,7 @@ import { upload } from "@imagekit/next";
 import { ButtonGroup } from "../modular/button";
 import { api } from "@/lib/api";
 import { UserType, getCurrentUser } from "@/lib/user";
-import { ArrowRight, Images, X } from "lucide-react";
+import { ArrowRight, Images, X, SwitchCamera } from "lucide-react";
 import { useParams } from "next/navigation";
 import { ConversationData } from "../../app/app/visualizer/[conversation_id]/page";
 import { isShoppingProductUrl } from "../../utils/regex";
@@ -33,6 +33,8 @@ export const SeeOnComponent = ({
   const [user, setUser] = useState<UserType | null>(null);
   const [inputLink, setInputLink] = useState<string>("");
   const [uploading, setUploading] = useState<boolean>(false);
+  const [rearCameras, setRearCameras] = useState<MediaDeviceInfo[]>([]);
+  const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
 
   // refs
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -104,10 +106,18 @@ export const SeeOnComponent = ({
     startCamera();
   };
 
-  const startCamera = async () => {
+  const startCamera = async (deviceId?: string) => {
     try {
+      // Stop previous stream
+      if (videoRef.current?.srcObject) {
+        const oldStream = videoRef.current.srcObject as MediaStream;
+        oldStream.getTracks().forEach((track) => track.stop());
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
+        video: deviceId
+          ? { deviceId: { exact: deviceId } }
+          : { facingMode: { ideal: "environment" } },
         audio: false,
       });
 
@@ -117,6 +127,22 @@ export const SeeOnComponent = ({
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const getRearCameras = async () => {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const rear = devices.filter((device) => device.kind === "videoinput");
+    setRearCameras(rear);
+  };
+
+  const switchCamera = async () => {
+    if (rearCameras.length <= 1) return;
+
+    const nextIndex = (currentCameraIndex + 1) % rearCameras.length;
+
+    await startCamera(rearCameras[nextIndex].deviceId);
+
+    setCurrentCameraIndex(nextIndex);
   };
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -284,6 +310,7 @@ export const SeeOnComponent = ({
   useEffect(() => {
     if (activeTab === "E-Commerce Link") return;
     startCamera();
+    getRearCameras();
   }, [activeTab]);
 
   useEffect(() => {
@@ -339,7 +366,12 @@ export const SeeOnComponent = ({
               playsInline
               className="h-full w-full object-cover"
             />
-
+            <div
+              className="absolute right-6 top-6 flex flex-col items-center bg-accent p-2"
+              onClick={() => switchCamera()}
+            >
+              <SwitchCamera className="text-contrast" />
+            </div>
             <div className="absolute -bottom-12 z-5 flex h-24 w-full items-center justify-around">
               <div
                 className="flex h-24 w-24 items-center justify-center bg-contrast"

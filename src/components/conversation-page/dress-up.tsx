@@ -13,7 +13,7 @@ import { upload } from "@imagekit/next";
 import { ButtonGroup } from "../modular/button";
 import { DressUpConfig } from "../../utils/dress-up";
 import { api } from "@/lib/api";
-import { Plus, X, Images, ArrowRight } from "lucide-react";
+import { Plus, X, Images, ArrowRight, SwitchCamera } from "lucide-react";
 
 const NEXT_PUBLIC_IMGKIT_PUBLIC_KEY =
   process.env.NEXT_PUBLIC_IMGKIT_PUBLIC_KEY || "";
@@ -41,6 +41,8 @@ export const DressUpComponent = ({
   const [openCamera, setOpenCamera] = useState<boolean>(false);
   const [uploading, setUploading] = useState<boolean>(false);
   const [customInstruction, setCustomInstruction] = useState("");
+  const [rearCameras, setRearCameras] = useState<MediaDeviceInfo[]>([]);
+  const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -68,10 +70,18 @@ export const DressUpComponent = ({
     },
   ];
 
-  const startCamera = async () => {
+  const startCamera = async (deviceId?: string) => {
     try {
+      // Stop previous stream
+      if (videoRef.current?.srcObject) {
+        const oldStream = videoRef.current.srcObject as MediaStream;
+        oldStream.getTracks().forEach((track) => track.stop());
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
+        video: deviceId
+          ? { deviceId: { exact: deviceId } }
+          : { facingMode: { ideal: "environment" } },
         audio: false,
       });
 
@@ -137,6 +147,22 @@ export const DressUpComponent = ({
     setCapturedImages((prev) => [...prev, { for: cameraFor, url: image }]);
     setOpenCamera(false);
     setCameraFor("");
+  };
+
+  const getRearCameras = async () => {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const rear = devices.filter((device) => device.kind === "videoinput");
+    setRearCameras(rear);
+  };
+
+  const switchCamera = async () => {
+    if (rearCameras.length <= 1) return;
+
+    const nextIndex = (currentCameraIndex + 1) % rearCameras.length;
+
+    await startCamera(rearCameras[nextIndex].deviceId);
+
+    setCurrentCameraIndex(nextIndex);
   };
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -305,6 +331,7 @@ export const DressUpComponent = ({
   useEffect(() => {
     if (!openCamera) return;
     startCamera();
+    getRearCameras();
   }, [openCamera]);
 
   useEffect(() => {
@@ -397,6 +424,13 @@ export const DressUpComponent = ({
               playsInline
               className="h-full w-full object-cover"
             />
+
+            <div
+              className="absolute right-6 top-6 flex flex-col items-center bg-accent p-2"
+              onClick={() => switchCamera()}
+            >
+              <SwitchCamera className="text-contrast" />
+            </div>
 
             <div className="absolute -bottom-12 z-5 flex h-24 w-full items-center justify-around">
               <div
