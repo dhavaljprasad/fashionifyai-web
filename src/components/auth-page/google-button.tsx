@@ -24,9 +24,7 @@ export function GoogleSignInButton() {
       const response = await api.post("/auth/sign-in", {
         credential: creds,
       });
-
-      console.log("success", response.data);
-      router.push("/app");
+      window.location.reload();
     } catch (e: any) {
       console.error("Error:", e?.response?.data || e.message);
     }
