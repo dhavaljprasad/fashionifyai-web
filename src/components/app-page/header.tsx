@@ -17,7 +17,7 @@ export const AppPageHeader = ({
   const router = useRouter();
 
   return (
-    <div className="fixed z-10 flex h-16 w-full items-center justify-between border-b px-4 backdrop-blur-sm sm:px-16">
+    <div className="fixed z-15 flex h-16 w-full items-center justify-between border-b px-4 backdrop-blur-sm sm:px-16">
       <div className="flex items-center justify-center gap-2">
         <div onClick={() => setShowSidebar()}>
           {showSidebar ? (
