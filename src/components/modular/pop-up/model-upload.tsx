@@ -6,6 +6,7 @@ import { useAuth } from "@/app/providers/auth";
 import { api } from "@/lib/api";
 import { X, Images } from "lucide-react";
 import { ButtonPrimary } from "@/components/modular/button";
+import axios from "axios";
 
 const NEXT_PUBLIC_IMGKIT_PUBLIC_KEY =
   process.env.NEXT_PUBLIC_IMGKIT_PUBLIC_KEY || "";
@@ -248,28 +249,25 @@ export const ModelUploadPopUp = ({ onClose }: { onClose: () => void }) => {
 
   const onConfirmImage = async () => {
     try {
-      const convRes = await api.get("/api/model/img-upload");
+      const file_name = `user_model_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.webp`;
+      const convRes = await api.post("/api/model/img-upload", {
+        file_name: file_name,
+      });
 
       if (convRes.status === 200) {
-        const { token, expire, signature } = convRes.data.imgkit_auth;
-        const file_name = "user_model.webp";
+        const { upload_url, url, file_path } = convRes.data.r2_creds;
 
         // uploading image
         const res = await fetch(capturedImage);
         const blob = await res.blob();
-        const uploadResponse = await upload({
-          // Authentication parameters
-          expire: expire,
-          token: token,
-          signature: signature,
-          publicKey: NEXT_PUBLIC_IMGKIT_PUBLIC_KEY,
-          file: blob,
-          fileName: file_name,
-          folder: `/${user?.id}/uploads/models/`,
-          useUniqueFileName: true,
+        // Upload directly to R2
+        await axios.put(upload_url, blob, {
+          headers: {
+            "Content-Type": "image/webp",
+          },
         });
 
-        return uploadResponse.name;
+        return file_name;
       }
     } catch (e) {
       console.log(

@@ -14,6 +14,7 @@ import { ArrowRight, Images, X, SwitchCamera } from "lucide-react";
 import { useParams } from "next/navigation";
 import { ConversationData } from "../../app/app/visualizer/[conversation_id]/page";
 import { isShoppingProductUrl } from "../../utils/regex";
+import axios from "axios";
 
 const NEXT_PUBLIC_IMGKIT_PUBLIC_KEY =
   process.env.NEXT_PUBLIC_IMGKIT_PUBLIC_KEY || "";
@@ -214,42 +215,40 @@ export const SeeOnComponent = ({
     setUploading(true);
     try {
       if (activeTab === "Upload Picture") {
-        const convRes = await api.get("/api/conversation/init-upload");
+        const file_name = `user_see_on_image.webp`;
+        const conversation_id = params.conversation_id as string;
+        const convRes = await api.post("/api/conversation/init-upload", {
+          file_name: file_name,
+          conversation_id: conversation_id,
+        });
 
         if (convRes.status === 200) {
-          const { token, expire, signature } = convRes.data.imgkit_auth;
-          const conversation_id = params.conversation_id as string;
-          const file_name = `user_see_on_image.webp`;
+          const { upload_url, url, file_path } = convRes.data.r2_creds;
 
           // uploading image
           const res = await fetch(capturedImage);
           const blob = await res.blob();
-
-          const uploadResponse = await upload({
-            expire: expire,
-            token: token,
-            signature: signature,
-            publicKey: NEXT_PUBLIC_IMGKIT_PUBLIC_KEY,
-            file: blob,
-            fileName: file_name,
-            folder: `/${user?.id}/uploads/${conversation_id}`,
-            useUniqueFileName: false,
+          // Upload directly to R2
+          await axios.put(upload_url, blob, {
+            headers: {
+              "Content-Type": "image/webp",
+            },
           });
-          const uploadedUrl = uploadResponse.url;
+          const uploadedUrl = upload_url;
           if (!uploadedUrl) return;
           try {
             const saveMsgRes = await api.post(
               "/api/conversation/save-see-on-image",
               {
                 conversation_id: conversation_id,
-                file_name: uploadResponse.name,
-                text: uploadResponse.url,
+                file_name: file_name,
+                text: upload_url,
               },
             );
             if (saveMsgRes.status === 200) {
               const seeOnRes = await api.post("/api/conversation/see-on", {
                 conversation_id: conversation_id,
-                link: uploadResponse.url,
+                link: upload_url,
               });
               setConversationData((prev) => [
                 ...prev,

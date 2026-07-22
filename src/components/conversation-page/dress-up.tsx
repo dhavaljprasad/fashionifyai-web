@@ -14,6 +14,7 @@ import { ButtonGroup } from "../modular/button";
 import { DressUpConfig } from "../../utils/dress-up";
 import { api } from "@/lib/api";
 import { Plus, X, Images, ArrowRight, SwitchCamera } from "lucide-react";
+import axios from "axios";
 
 const NEXT_PUBLIC_IMGKIT_PUBLIC_KEY =
   process.env.NEXT_PUBLIC_IMGKIT_PUBLIC_KEY || "";
@@ -243,43 +244,47 @@ export const DressUpComponent = ({
     if (!capturedImages.length) return;
 
     setUploading(true);
+
     try {
-      const convRes = await api.get(
-        `/api/conversation/init-multiple-uploads/${capturedImages.length}`,
+      const conversation_id = params.conversation_id as string;
+
+      const file_names = capturedImages.map(
+        (item) => `${item.for.replace(/\s+/g, "_")}.webp`,
       );
+
+      const convRes = await api.post(
+        "/api/conversation/init-multiple-uploads",
+        {
+          conversation_id,
+          file_names,
+        },
+      );
+
       if (convRes.status !== 200) return;
 
-      const imgkit_auths = convRes.data.imgkit_auths || [];
-      if (imgkit_auths.length !== capturedImages.length) {
-        return;
-      }
+      const r2_creds = convRes.data.r2_creds || [];
 
-      const conversation_id = params.conversation_id as string;
-      const folder = `/${user?.id}/uploads/${conversation_id}`;
+      if (r2_creds.length !== capturedImages.length) {
+        throw new Error("Mismatch between images and upload credentials.");
+      }
 
       const uploadedImages: string[] = [];
       const uploadedImagesUrl: string[] = [];
 
       for (let index = 0; index < capturedImages.length; index += 1) {
         const item = capturedImages[index];
-        const { token, expire, signature } = imgkit_auths[index];
-        const blob = await fetch(item.url).then((res) => res.blob());
-        const fileName = `${item.for.replace(/\s+/g, "_")}.webp`;
+        const { upload_url, url, file_path } = r2_creds[index];
 
-        const uploadResponse = await upload({
-          expire,
-          token,
-          signature,
-          publicKey: NEXT_PUBLIC_IMGKIT_PUBLIC_KEY,
-          file: blob,
-          fileName,
-          folder,
-          useUniqueFileName: false,
+        const blob = await fetch(item.url).then((res) => res.blob());
+
+        await axios.put(upload_url, blob, {
+          headers: {
+            "Content-Type": "image/webp",
+          },
         });
-        uploadedImages.push(
-          (uploadResponse?.name || "").replace(/\.webp$/i, ""),
-        );
-        uploadedImagesUrl.push(uploadResponse.url || "");
+
+        uploadedImages.push(file_path.split("/").pop()!);
+        uploadedImagesUrl.push(url);
       }
 
       const trimmedInstruction = customInstruction?.trim();
@@ -288,41 +293,38 @@ export const DressUpComponent = ({
         trimmedInstruction ? ` & Custom Prompt: ${trimmedInstruction}` : ""
       }`;
 
-      try {
-        const saveMsgRes = await api.post(
-          "/api/conversation/save-dress-up-images",
+      const saveMsgRes = await api.post(
+        "/api/conversation/save-dress-up-images",
+        {
+          conversation_id,
+          file_names: uploadedImages,
+          text: user_message,
+        },
+      );
+
+      if (saveMsgRes.status === 200) {
+        const dressUpRes = await api.post("/api/conversation/dress-up", {
+          conversation_id,
+          uploaded_images: uploadedImages,
+          dress: selectedOutfit,
+          custom_instruction: customInstruction,
+        });
+
+        setConversationData((prev) => [
+          ...prev,
           {
-            conversation_id: conversation_id,
-            file_names: uploadedImages,
+            role: "user",
             text: user_message,
+            images: uploadedImagesUrl,
           },
-        );
+        ]);
 
-        if (saveMsgRes.status === 200) {
-          const dressUpRes = await api.post("/api/conversation/dress-up", {
-            conversation_id: conversation_id,
-            uploaded_images: uploadedImages,
-            dress: selectedOutfit,
-            custom_instruction: customInstruction,
-          });
-
-          setConversationData((prev) => [
-            ...prev,
-            {
-              role: "user",
-              text: user_message,
-              images: uploadedImagesUrl,
-            },
-          ]);
-          setPoolingId(dressUpRes.data.pooling_id);
-        }
-      } catch (e) {
-        throw e;
+        setPoolingId(dressUpRes.data.pooling_id);
       }
 
       console.log("Uploaded images", uploadedImages);
     } catch (e) {
-      console.log("Unexpected error occured as: ", e);
+      console.error("Unexpected error occurred:", e);
     } finally {
       setUploading(false);
     }

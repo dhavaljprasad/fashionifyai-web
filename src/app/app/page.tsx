@@ -11,6 +11,7 @@ import { upload } from "@imagekit/next";
 import { Check, X, Images, SwitchCamera } from "lucide-react";
 import { CreativeInputBox } from "@/components/app-page/creative-input";
 import { getRandomGreeting } from "@/utils/greetings";
+import axios from "axios";
 
 const NEXT_PUBLIC_IMGKIT_PUBLIC_KEY =
   process.env.NEXT_PUBLIC_IMGKIT_PUBLIC_KEY || "";
@@ -193,26 +194,24 @@ function AppPage() {
     try {
       if (uploading) return;
       setUploading(true);
-      const convRes = await api.get("/api/conversation/visualization/init");
+      const file_name = "user_image.webp";
+
+      const convRes = await api.post("/api/conversation/visualization/init", {
+        file_name: file_name,
+      });
 
       if (convRes.status === 200) {
         const conversation_id = convRes.data.conversation_id;
-        const { token, expire, signature } = convRes.data.imgkit_auth;
-        const file_name = "user_image.webp";
+        const { upload_url, url, file_path } = convRes.data.r2_creds;
 
         // uploading image
         const res = await fetch(capturedImage);
         const blob = await res.blob();
-        const uploadResponse = await upload({
-          // Authentication parameters
-          expire: expire,
-          token: token,
-          signature: signature,
-          publicKey: NEXT_PUBLIC_IMGKIT_PUBLIC_KEY,
-          file: blob,
-          fileName: file_name,
-          folder: `/${user?.id}/uploads/${conversation_id}`,
-          useUniqueFileName: false,
+        // Upload directly to R2
+        await axios.put(upload_url, blob, {
+          headers: {
+            "Content-Type": "image/webp",
+          },
         });
 
         // saving the uploaded image to the conversation
@@ -227,7 +226,7 @@ function AppPage() {
             message?: string;
           } = {
             conversation_id: conversation_id,
-            file_name: uploadResponse.name || "",
+            file_name: file_name,
           };
 
           if (selectedModel) {
