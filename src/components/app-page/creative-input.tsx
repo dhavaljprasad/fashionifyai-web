@@ -10,8 +10,8 @@ export const CreativeInputBox = ({
 }: {
   modelsData: ModelCardDataType[];
 }) => {
-  const [selectedModel, setSelectedModel] = useState<ModelCardDataType>(
-    modelsData[0],
+  const [selectedModel, setSelectedModel] = useState<ModelCardDataType | null>(
+    modelsData[0] ?? null,
   );
 
   return (
@@ -23,11 +23,17 @@ export const CreativeInputBox = ({
       />
 
       <div className="w-full flex items-center justify-between gap-2">
-        <Dropdown
-          modelsData={modelsData}
-          selectedModel={selectedModel}
-          onSelect={setSelectedModel}
-        />
+        {modelsData.length > 0 && selectedModel ? (
+          <Dropdown
+            modelsData={modelsData}
+            selectedModel={selectedModel}
+            onSelect={setSelectedModel}
+          />
+        ) : (
+          <div className="h-12 px-3 flex items-center text-accent font-medium">
+            Default Wardrobe
+          </div>
+        )}
 
         <ButtonSecondary
           text="Send"
@@ -70,9 +76,9 @@ const Dropdown = ({
     <div ref={dropdownRef} className="relative w-64 h-12">
       {/* Trigger */}
       <button
+        type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className={`absolute inset-0 w-full h-12 px-3 flex items-center justify-between transition-all
-        ${
+        className={`absolute inset-0 w-full h-12 px-3 flex items-center justify-between transition-all ${
           open
             ? "opacity-0 pointer-events-none"
             : "opacity-100 hover:bg-contrast hover:text-background-primary"
@@ -100,15 +106,15 @@ const Dropdown = ({
             return (
               <button
                 key={model.model_id}
+                type="button"
                 onClick={() => {
                   onSelect(model);
                   setOpen(false);
                 }}
-                className={`w-full h-12 px-3 flex items-center justify-between transition-colors bg-background-secondary
-                ${
+                className={`w-full h-12 px-3 flex items-center justify-between transition-colors ${
                   isSelected
                     ? "bg-contrast text-background-primary"
-                    : "hover:bg-background-primary hover:text-contrast"
+                    : "bg-background-secondary hover:bg-background-primary hover:text-contrast"
                 }`}
               >
                 <div className="flex items-center gap-3 min-w-0">
