@@ -1,39 +1,26 @@
-const CACHE_NAME = "fashionifyai-v1";
-
-const urlsToCache = ["/"];
+// sw.js
 
 self.addEventListener("install", (event) => {
   console.log("[SW] Installed");
 
+  // Activate the new service worker immediately.
   self.skipWaiting();
-
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(urlsToCache);
-    }),
-  );
 });
 
 self.addEventListener("activate", (event) => {
   console.log("[SW] Activated");
 
   event.waitUntil(
-    caches.keys().then((cacheNames) =>
-      Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            return caches.delete(cache);
-          }
-        }),
-      ),
-    ),
+    (async () => {
+      // Take control of all existing tabs immediately.
+      await self.clients.claim();
+    })(),
   );
-
-  self.clients.claim();
 });
 
-self.addEventListener("fetch", (event) => {
-  event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request)),
-  );
+// Optional: Listen for messages from the app.
+// Useful later for things like forcing an update,
+// clearing data, or handling push notifications.
+self.addEventListener("message", (event) => {
+  console.log("[SW] Message received:", event.data);
 });
