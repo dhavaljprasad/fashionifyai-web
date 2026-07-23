@@ -9,15 +9,11 @@ import {
 import { ConversationData } from "../../app/app/visualizer/[conversation_id]/page";
 import { useParams } from "next/navigation";
 import { UserType, getCurrentUser } from "@/lib/user";
-import { upload } from "@imagekit/next";
 import { ButtonGroup } from "../modular/button";
 import { DressUpConfig } from "../../utils/dress-up";
 import { api } from "@/lib/api";
 import { Plus, X, Images, ArrowRight, SwitchCamera } from "lucide-react";
 import axios from "axios";
-
-const NEXT_PUBLIC_IMGKIT_PUBLIC_KEY =
-  process.env.NEXT_PUBLIC_IMGKIT_PUBLIC_KEY || "";
 
 interface CapturedImagesType {
   for: string;

@@ -7,14 +7,10 @@ import { ModelCard, ModelCardDataType } from "@/components/app-page/model-card";
 import { SegmentedFloatingButton } from "@/components/app-page/segmented-float-button";
 import { api } from "@/lib/api";
 import { useAuth } from "../providers/auth";
-import { upload } from "@imagekit/next";
 import { Check, X, Images, SwitchCamera } from "lucide-react";
 import { CreativeInputBox } from "@/components/app-page/creative-input";
 import { getRandomGreeting } from "@/utils/greetings";
 import axios from "axios";
-
-const NEXT_PUBLIC_IMGKIT_PUBLIC_KEY =
-  process.env.NEXT_PUBLIC_IMGKIT_PUBLIC_KEY || "";
 
 function AppPage() {
   const [showSidebar, setShowSidebar] = useState(false);
@@ -203,6 +199,8 @@ function AppPage() {
       if (convRes.status === 200) {
         const conversation_id = convRes.data.conversation_id;
         const { upload_url, url, file_path } = convRes.data.r2_creds;
+
+        console.log(convRes.data.r2_creds, "r2_creds");
 
         // uploading image
         const res = await fetch(capturedImage);

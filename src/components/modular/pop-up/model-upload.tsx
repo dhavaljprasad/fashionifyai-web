@@ -1,15 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { upload } from "@imagekit/next";
 import { useAuth } from "@/app/providers/auth";
 import { api } from "@/lib/api";
 import { X, Images } from "lucide-react";
 import { ButtonPrimary } from "@/components/modular/button";
 import axios from "axios";
-
-const NEXT_PUBLIC_IMGKIT_PUBLIC_KEY =
-  process.env.NEXT_PUBLIC_IMGKIT_PUBLIC_KEY || "";
 
 type Gender = "male" | "female";
 
@@ -303,7 +299,7 @@ export const ModelUploadPopUp = ({ onClose }: { onClose: () => void }) => {
 
       console.log("Saving model data", saveRes.data);
       setUploading(false);
-      onClose();
+      window.location.reload();
     } catch (e) {
       console.log("Unexpected error occured as: ", e);
       setUploading(false);

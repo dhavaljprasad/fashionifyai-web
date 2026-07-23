@@ -6,7 +6,6 @@ import {
   type Dispatch,
   type SetStateAction,
 } from "react";
-import { upload } from "@imagekit/next";
 import { ButtonGroup } from "../modular/button";
 import { api } from "@/lib/api";
 import { UserType, getCurrentUser } from "@/lib/user";
@@ -15,9 +14,6 @@ import { useParams } from "next/navigation";
 import { ConversationData } from "../../app/app/visualizer/[conversation_id]/page";
 import { isShoppingProductUrl } from "../../utils/regex";
 import axios from "axios";
-
-const NEXT_PUBLIC_IMGKIT_PUBLIC_KEY =
-  process.env.NEXT_PUBLIC_IMGKIT_PUBLIC_KEY || "";
 
 export const SeeOnComponent = ({
   setConversationData,
@@ -234,7 +230,7 @@ export const SeeOnComponent = ({
               "Content-Type": "image/webp",
             },
           });
-          const uploadedUrl = upload_url;
+          const uploadedUrl = url;
           if (!uploadedUrl) return;
           try {
             const saveMsgRes = await api.post(
@@ -242,13 +238,13 @@ export const SeeOnComponent = ({
               {
                 conversation_id: conversation_id,
                 file_name: file_name,
-                text: upload_url,
+                text: url,
               },
             );
             if (saveMsgRes.status === 200) {
               const seeOnRes = await api.post("/api/conversation/see-on", {
                 conversation_id: conversation_id,
-                link: upload_url,
+                link: url,
               });
               setConversationData((prev) => [
                 ...prev,
