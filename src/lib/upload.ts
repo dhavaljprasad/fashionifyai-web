@@ -16,6 +16,10 @@ export async function uploadBlobToPresignedUrl({
   blob: Blob;
   contentType: string;
 }) {
+  console.log("blob.type", blob.type);
+  console.log("blob.size", blob.size);
+  console.log("upload_url", uploadUrl);
+
   const res = await fetch(uploadUrl, {
     method: "PUT",
     body: blob,
