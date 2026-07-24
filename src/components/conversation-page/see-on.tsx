@@ -13,7 +13,11 @@ import { ArrowRight, Images, X, SwitchCamera } from "lucide-react";
 import { useParams } from "next/navigation";
 import { ConversationData } from "../../app/app/visualizer/[conversation_id]/page";
 import { isShoppingProductUrl } from "../../utils/regex";
-import axios from "axios";
+import {
+  IMAGE_WEBP_CONTENT_TYPE,
+  type LocalImageSelection,
+  uploadBlobToPresignedUrl,
+} from "@/lib/upload";
 
 export const SeeOnComponent = ({
   setConversationData,
@@ -26,7 +30,8 @@ export const SeeOnComponent = ({
   const [activeTab, setActiveTab] = useState<
     "E-Commerce Link" | "Upload Picture"
   >("E-Commerce Link");
-  const [capturedImage, setCapturedImage] = useState<string>("");
+  const [selectedImage, setSelectedImage] =
+    useState<LocalImageSelection | null>(null);
   const [user, setUser] = useState<UserType | null>(null);
   const [inputLink, setInputLink] = useState<string>("");
   const [uploading, setUploading] = useState<boolean>(false);
@@ -93,13 +98,25 @@ export const SeeOnComponent = ({
       targetHeight,
     );
 
-    const image = canvas.toDataURL("image/webp", 0.8);
-    setCapturedImage(image);
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) return;
+
+        setSelectedImage({
+          kind: "local",
+          previewUrl: URL.createObjectURL(blob),
+          blob,
+          contentType: IMAGE_WEBP_CONTENT_TYPE,
+        });
+      },
+      IMAGE_WEBP_CONTENT_TYPE,
+      0.8,
+    );
   };
 
   const onDiscardImage = () => {
     // if (uploading) return
-    setCapturedImage("");
+    setSelectedImage(null);
     startCamera();
   };
 
@@ -190,9 +207,14 @@ export const SeeOnComponent = ({
           if (!blob) return;
 
           const finalUrl = URL.createObjectURL(blob);
-          setCapturedImage(finalUrl); // same pattern as your previous version
+          setSelectedImage({
+            kind: "local",
+            previewUrl: finalUrl,
+            blob,
+            contentType: IMAGE_WEBP_CONTENT_TYPE,
+          });
         },
-        "image/webp",
+        IMAGE_WEBP_CONTENT_TYPE,
         0.8,
       );
 
@@ -211,6 +233,8 @@ export const SeeOnComponent = ({
     setUploading(true);
     try {
       if (activeTab === "Upload Picture") {
+        if (!selectedImage) return;
+
         const file_name = `user_see_on_image.webp`;
         const conversation_id = params.conversation_id as string;
         const convRes = await api.post("/api/conversation/init-upload", {
@@ -219,16 +243,12 @@ export const SeeOnComponent = ({
         });
 
         if (convRes.status === 200) {
-          const { upload_url, url, file_path } = convRes.data.r2_creds;
+          const { upload_url, url } = convRes.data.r2_creds;
 
-          // uploading image
-          const res = await fetch(capturedImage);
-          const blob = await res.blob();
-          // Upload directly to R2
-          await axios.put(upload_url, blob, {
-            headers: {
-              "Content-Type": "image/webp",
-            },
+          await uploadBlobToPresignedUrl({
+            uploadUrl: upload_url,
+            blob: selectedImage.blob,
+            contentType: selectedImage.contentType,
           });
           const uploadedUrl = url;
           if (!uploadedUrl) return;
@@ -340,9 +360,12 @@ export const SeeOnComponent = ({
       )}
 
       {activeTab === "Upload Picture" &&
-        (capturedImage ? (
+        (selectedImage ? (
           <div className="relative aspect-[2/3] h-fit max-h-[70dvh]">
-            <img src={capturedImage} className="h-full w-full object-cover" />
+            <img
+              src={selectedImage.previewUrl}
+              className="h-full w-full object-cover"
+            />
 
             <div className="absolute -bottom-12 flex h-24 w-full items-center justify-around">
               <div

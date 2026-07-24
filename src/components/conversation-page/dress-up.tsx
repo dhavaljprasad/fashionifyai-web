@@ -13,11 +13,16 @@ import { ButtonGroup } from "../modular/button";
 import { DressUpConfig } from "../../utils/dress-up";
 import { api } from "@/lib/api";
 import { Plus, X, Images, ArrowRight, SwitchCamera } from "lucide-react";
-import axios from "axios";
+import {
+  IMAGE_WEBP_CONTENT_TYPE,
+  uploadBlobToPresignedUrl,
+} from "@/lib/upload";
 
 interface CapturedImagesType {
   for: string;
-  url: string;
+  previewUrl: string;
+  blob: Blob;
+  contentType: typeof IMAGE_WEBP_CONTENT_TYPE;
 }
 
 export const DressUpComponent = ({
@@ -140,10 +145,25 @@ export const DressUpComponent = ({
       targetHeight,
     );
 
-    const image = canvas.toDataURL("image/webp", 0.8);
-    setCapturedImages((prev) => [...prev, { for: cameraFor, url: image }]);
-    setOpenCamera(false);
-    setCameraFor("");
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) return;
+
+        setCapturedImages((prev) => [
+          ...prev,
+          {
+            for: cameraFor,
+            previewUrl: URL.createObjectURL(blob),
+            blob,
+            contentType: IMAGE_WEBP_CONTENT_TYPE,
+          },
+        ]);
+        setOpenCamera(false);
+        setCameraFor("");
+      },
+      IMAGE_WEBP_CONTENT_TYPE,
+      0.8,
+    );
   };
 
   const getRearCameras = async () => {
@@ -212,12 +232,17 @@ export const DressUpComponent = ({
           const finalUrl = URL.createObjectURL(blob);
           setCapturedImages((prev) => [
             ...prev,
-            { for: cameraFor, url: finalUrl },
+            {
+              for: cameraFor,
+              previewUrl: finalUrl,
+              blob,
+              contentType: IMAGE_WEBP_CONTENT_TYPE,
+            },
           ]);
           setOpenCamera(false);
           setCameraFor("");
         },
-        "image/webp",
+        IMAGE_WEBP_CONTENT_TYPE,
         0.8,
       );
 
@@ -271,12 +296,10 @@ export const DressUpComponent = ({
         const item = capturedImages[index];
         const { upload_url, url, file_path } = r2_creds[index];
 
-        const blob = await fetch(item.url).then((res) => res.blob());
-
-        await axios.put(upload_url, blob, {
-          headers: {
-            "Content-Type": "image/webp",
-          },
+        await uploadBlobToPresignedUrl({
+          uploadUrl: upload_url,
+          blob: item.blob,
+          contentType: item.contentType,
         });
 
         uploadedImages.push(file_path.split("/").pop()!);
@@ -383,7 +406,7 @@ export const DressUpComponent = ({
                         <img
                           src={
                             capturedImages.find((img) => img.for === item.name)
-                              ?.url
+                              ?.previewUrl
                           }
                           alt={item.name}
                           className="h-full w-full object-cover"

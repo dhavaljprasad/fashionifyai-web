@@ -6,18 +6,33 @@ import { SideBar } from "@/components/modular/side-bar";
 import { ModelCard, ModelCardDataType } from "@/components/app-page/model-card";
 import { SegmentedFloatingButton } from "@/components/app-page/segmented-float-button";
 import { api } from "@/lib/api";
+import {
+  IMAGE_WEBP_CONTENT_TYPE,
+  type LocalImageSelection,
+  uploadBlobToPresignedUrl,
+} from "@/lib/upload";
 import { useAuth } from "../providers/auth";
 import { Check, X, Images, SwitchCamera } from "lucide-react";
 import { CreativeInputBox } from "@/components/app-page/creative-input";
 import { getRandomGreeting } from "@/utils/greetings";
-import axios from "axios";
+
+type SelectedImage =
+  | LocalImageSelection
+  | {
+      kind: "remote";
+      previewUrl: string;
+      source: "recent_photo" | "registered_model";
+      imageUrl: string;
+      modelId?: string;
+    };
 
 function AppPage() {
   const [showSidebar, setShowSidebar] = useState(false);
-  const [capturedImage, setCapturedImage] = useState<string>("");
+  const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(
+    null,
+  );
   const [recentImages, setRecentImages] = useState<string[]>([]);
   const [userModels, setUserModels] = useState<ModelCardDataType[]>([]);
-  const [userModelSelected, setUserModelSelected] = useState<boolean>(false);
   const [uploading, setUploading] = useState(false);
   const [activeSection, setActiveSection] = useState<
     "visualization" | "ai stylist"
@@ -97,8 +112,20 @@ function AppPage() {
       targetHeight,
     );
 
-    const image = canvas.toDataURL("image/webp", 0.8);
-    setCapturedImage(image);
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) return;
+
+        setSelectedImage({
+          kind: "local",
+          previewUrl: URL.createObjectURL(blob),
+          blob,
+          contentType: IMAGE_WEBP_CONTENT_TYPE,
+        });
+      },
+      IMAGE_WEBP_CONTENT_TYPE,
+      0.8,
+    );
   };
 
   const getRearCameras = async () => {
@@ -166,9 +193,14 @@ function AppPage() {
           if (!blob) return;
 
           const finalUrl = URL.createObjectURL(blob);
-          setCapturedImage(finalUrl); // same pattern as your previous version
+          setSelectedImage({
+            kind: "local",
+            previewUrl: finalUrl,
+            blob,
+            contentType: IMAGE_WEBP_CONTENT_TYPE,
+          });
         },
-        "image/webp",
+        IMAGE_WEBP_CONTENT_TYPE,
         0.8,
       );
 
@@ -181,15 +213,15 @@ function AppPage() {
   // loaded image functions
   const onDiscardImage = () => {
     if (uploading) return;
-    setCapturedImage("");
+    setSelectedImage(null);
     startCamera();
-    setUserModelSelected(false);
   };
 
   const onConfirmImage = async () => {
     try {
-      if (uploading) return;
+      if (uploading || !selectedImage) return;
       setUploading(true);
+
       const file_name = "user_image.webp";
 
       const convRes = await api.post("/api/conversation/visualization/init", {
@@ -198,25 +230,30 @@ function AppPage() {
 
       if (convRes.status === 200) {
         const conversation_id = convRes.data.conversation_id;
-        const { upload_url, url, file_path } = convRes.data.r2_creds;
+        const { upload_url } = convRes.data.r2_creds;
 
         console.log(convRes.data.r2_creds, "r2_creds");
 
-        // uploading image
-        const res = await fetch(capturedImage);
-        const blob = await res.blob();
-        // Upload directly to R2
-        await axios.put(upload_url, blob, {
-          headers: {
-            "Content-Type": "image/webp",
-          },
+        const uploadBlob =
+          selectedImage.kind === "local"
+            ? selectedImage.blob
+            : await fetch(selectedImage.imageUrl).then((res) => res.blob());
+
+        await uploadBlobToPresignedUrl({
+          uploadUrl: upload_url,
+          blob: uploadBlob,
+          contentType: IMAGE_WEBP_CONTENT_TYPE,
         });
 
         // saving the uploaded image to the conversation
         try {
-          const selectedModel = userModelSelected
-            ? userModels.find((model) => model.image_url === capturedImage)
-            : undefined;
+          const selectedModel =
+            selectedImage.kind === "remote" &&
+            selectedImage.source === "registered_model"
+              ? userModels.find(
+                  (model) => model.model_id === selectedImage.modelId,
+                )
+              : undefined;
 
           const savePayload: {
             conversation_id: string;
@@ -242,12 +279,12 @@ function AppPage() {
           throw e;
         }
       }
-      setUploading(false);
     } catch (e) {
       console.log(
         "Unexpected error occured uploading the image and geting conversation_id as",
         e,
       );
+    } finally {
       setUploading(false);
     }
   };
@@ -266,9 +303,14 @@ function AppPage() {
   };
 
   // on click of user model
-  const userModelSelectionFunc = (img_url: string) => {
-    setCapturedImage(img_url);
-    setUserModelSelected(true);
+  const userModelSelectionFunc = (model: ModelCardDataType) => {
+    setSelectedImage({
+      kind: "remote",
+      source: "registered_model",
+      previewUrl: model.image_url,
+      imageUrl: model.image_url,
+      modelId: model.model_id,
+    });
   };
 
   const onSwitchTabs = (tab: "visualization" | "ai stylist") => {
@@ -293,9 +335,12 @@ function AppPage() {
       {showSidebar && <SideBar />}
       {activeSection == "visualization" ? (
         <div className="flex h-full w-full flex-col items-center justify-between pt-22 sm:flex-row sm:justify-center sm:gap-4 sm:pt-24">
-          {capturedImage ? (
+          {selectedImage ? (
             <div className="relative aspect-[2/3] h-fit max-h-[70dvh] sm:max-h-[100dvh]">
-              <img src={capturedImage} className="h-full w-full object-cover" />
+              <img
+                src={selectedImage.previewUrl}
+                className="h-full w-full object-cover"
+              />
               <div
                 className={`absolute -bottom-12 flex h-24 w-full items-center justify-around ${uploading ? "opacity-50" : ""}`}
               >
@@ -361,7 +406,7 @@ function AppPage() {
                   <ModelCard
                     data={img}
                     key={index}
-                    selectImage={() => userModelSelectionFunc(img.image_url)}
+                    selectImage={() => userModelSelectionFunc(img)}
                   />
                 ))}
               </div>
@@ -378,7 +423,14 @@ function AppPage() {
                     key={index}
                     src={img}
                     className="w-20 cursor-pointer object-cover"
-                    onClick={() => setCapturedImage(img)}
+                    onClick={() =>
+                      setSelectedImage({
+                        kind: "remote",
+                        source: "recent_photo",
+                        previewUrl: img,
+                        imageUrl: img,
+                      })
+                    }
                   />
                 ))}
               </div>

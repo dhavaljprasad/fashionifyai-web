@@ -3,9 +3,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/app/providers/auth";
 import { api } from "@/lib/api";
+import {
+  IMAGE_WEBP_CONTENT_TYPE,
+  type LocalImageSelection,
+  uploadBlobToPresignedUrl,
+} from "@/lib/upload";
 import { X, Images } from "lucide-react";
 import { ButtonPrimary } from "@/components/modular/button";
-import axios from "axios";
 
 type Gender = "male" | "female";
 
@@ -78,7 +82,8 @@ const femaleMeasurementFields: MeasurementField[] = [
 ];
 
 export const ModelUploadPopUp = ({ onClose }: { onClose: () => void }) => {
-  const [capturedImage, setCapturedImage] = useState<string>("");
+  const [selectedImage, setSelectedImage] =
+    useState<LocalImageSelection | null>(null);
   const [uploading, setUploading] = useState(false);
   const [gender, setGender] = useState<Gender>("male");
   const [name, setName] = useState<string>("");
@@ -171,8 +176,20 @@ export const ModelUploadPopUp = ({ onClose }: { onClose: () => void }) => {
       targetHeight,
     );
 
-    const image = canvas.toDataURL("image/webp", 0.8);
-    setCapturedImage(image);
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) return;
+
+        setSelectedImage({
+          kind: "local",
+          previewUrl: URL.createObjectURL(blob),
+          blob,
+          contentType: IMAGE_WEBP_CONTENT_TYPE,
+        });
+      },
+      IMAGE_WEBP_CONTENT_TYPE,
+      0.8,
+    );
   };
 
   // file functions
@@ -224,9 +241,14 @@ export const ModelUploadPopUp = ({ onClose }: { onClose: () => void }) => {
           if (!blob) return;
 
           const finalUrl = URL.createObjectURL(blob);
-          setCapturedImage(finalUrl); // same pattern as your previous version
+          setSelectedImage({
+            kind: "local",
+            previewUrl: finalUrl,
+            blob,
+            contentType: IMAGE_WEBP_CONTENT_TYPE,
+          });
         },
-        "image/webp",
+        IMAGE_WEBP_CONTENT_TYPE,
         0.8,
       );
 
@@ -239,28 +261,25 @@ export const ModelUploadPopUp = ({ onClose }: { onClose: () => void }) => {
   // loaded image functions
   const onDiscardImage = () => {
     if (uploading) return;
-    setCapturedImage("");
+    setSelectedImage(null);
     startCamera();
   };
 
   const onConfirmImage = async () => {
     try {
+      if (!selectedImage) return;
       const file_name = `user_model_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.webp`;
       const convRes = await api.post("/api/model/img-upload", {
         file_name: file_name,
       });
 
       if (convRes.status === 200) {
-        const { upload_url, url, file_path } = convRes.data.r2_creds;
+        const { upload_url } = convRes.data.r2_creds;
 
-        // uploading image
-        const res = await fetch(capturedImage);
-        const blob = await res.blob();
-        // Upload directly to R2
-        await axios.put(upload_url, blob, {
-          headers: {
-            "Content-Type": "image/webp",
-          },
+        await uploadBlobToPresignedUrl({
+          uploadUrl: upload_url,
+          blob: selectedImage.blob,
+          contentType: selectedImage.contentType,
         });
 
         return file_name;
@@ -317,7 +336,7 @@ export const ModelUploadPopUp = ({ onClose }: { onClose: () => void }) => {
     gender === "male" ? maleMeasurements : femaleMeasurements;
   const isFormComplete =
     Boolean(name.trim()) &&
-    Boolean(capturedImage) &&
+    Boolean(selectedImage) &&
     measurementFields.every((field) =>
       Boolean(currentMeasurements[field.key]?.toString().trim()),
     );
@@ -325,11 +344,11 @@ export const ModelUploadPopUp = ({ onClose }: { onClose: () => void }) => {
   return (
     <div className="flex h-full w-full flex-col items-center gap-4 sm:flex-row sm:items-start sm:justify-start">
       <div className="flex w-full flex-col items-start justify-start gap-2 sm:w-1/3">
-        {capturedImage ? (
+        {selectedImage ? (
           <div className="relative w-full overflow-hidden rounded-2xl bg-black shadow-lg">
             <div className="aspect-[2/3] w-full">
               <img
-                src={capturedImage}
+                src={selectedImage.previewUrl}
                 alt="Captured preview"
                 className="h-full w-full object-cover"
               />
