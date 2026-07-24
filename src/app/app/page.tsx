@@ -237,7 +237,10 @@ function AppPage() {
         const uploadBlob =
           selectedImage.kind === "local"
             ? selectedImage.blob
-            : await fetch(selectedImage.imageUrl).then((res) => res.blob());
+            : await fetch(selectedImage.imageUrl, {
+                cache: "no-store",
+                mode: "cors",
+              }).then((res) => res.blob());
 
         await uploadBlobToPresignedUrl({
           uploadUrl: upload_url,
@@ -341,6 +344,9 @@ function AppPage() {
                 src={selectedImage.previewUrl}
                 className="h-full w-full object-cover"
               />
+              {/* <div className="h-full w-full bg-black text-white flex items-center justify-center">
+                Preview Disabled
+              </div> */}
               <div
                 className={`absolute -bottom-12 flex h-24 w-full items-center justify-around ${uploading ? "opacity-50" : ""}`}
               >
