@@ -53,7 +53,7 @@ export const SideBar = () => {
     getUserConversations();
   }, []);
   return (
-    <div className="fixed left-0 z-10 flex h-screen w-72 flex-col bg-background-secondary px-4 pt-20 pb-4">
+    <div className="fixed left-0 z-10 flex h-screen w-72 flex-col bg-background-secondary px-4 pt-20 pb-4 shadow-[20px_0_40px_rgba(0,0,0,0.50)]">
       <div className="flex w-full flex-col gap-2">
         {sideBarConstOptions.map((item, index) => {
           return (

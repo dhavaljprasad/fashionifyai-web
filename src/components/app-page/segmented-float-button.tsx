@@ -35,7 +35,7 @@ export const SegmentedFloatingButton = ({
         rounded-xl
         overflow-hidden
         bg-background-secondary
-        shadow-lg
+        shadow-xl/50
       "
     >
       {options.map((option) => {
