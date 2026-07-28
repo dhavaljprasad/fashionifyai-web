@@ -10,6 +10,7 @@ import { SeeOnComponent } from "@/components/conversation-page/see-on";
 import { DressUpComponent } from "@/components/conversation-page/dress-up";
 import { ImageViewer } from "@/components/conversation-page/image-viewer";
 import { InputBox } from "@/components/conversation-page/input-box";
+import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
 
 export type ConversationData = {
@@ -81,11 +82,20 @@ function ConversationPage() {
     }
   };
 
+  const FIRST_DELAY = 20000;
+  const REPEAT_DELAY = 2000;
+
   useEffect(() => {
-    if (!poolingId || poolingId === "") return;
-    const interval = setInterval(async () => {
+    if (!poolingId) return;
+
+    let cancelled = false;
+    let timeout: ReturnType<typeof setTimeout>;
+
+    const poll = async () => {
       try {
         const res = await api.get(`/api/pooling/${poolingId}`);
+
+        if (cancelled) return;
 
         if (res.data.status === "completed") {
           if (conversationData.length < 6) {
@@ -103,14 +113,26 @@ function ConversationPage() {
               res.data.data.iteration_result,
             ]);
           }
-          clearInterval(interval);
+
           setPoolingId("");
+          return;
         }
-      } catch (e) {
-        console.log("Unexpected error occured while polling as:", e);
+      } catch (err) {
+        console.error("Unexpected error occurred while polling:", err);
       }
-    }, 15000);
-    return () => clearInterval(interval);
+
+      if (!cancelled) {
+        timeout = setTimeout(poll, REPEAT_DELAY);
+      }
+    };
+
+    // First poll after 20 seconds
+    timeout = setTimeout(poll, FIRST_DELAY);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
   }, [poolingId]);
 
   useEffect(() => {
@@ -119,6 +141,10 @@ function ConversationPage() {
   }, [conversation_id]);
 
   useEffect(() => {
+    if (poolingId.length == 0) {
+      return;
+    }
+
     const autoScroll = () => {
       const element = document.getElementById("auto-scroll");
       if (element) {
@@ -127,7 +153,7 @@ function ConversationPage() {
     };
 
     autoScroll();
-  }, [conversationData]);
+  }, [conversationData, poolingId]);
 
   return (
     <div className="relative flex h-screen w-full flex-col items-center justify-start gap-4 bg-background-primary px-4 sm:px-16">
@@ -169,11 +195,16 @@ function ConversationPage() {
           />
         )}
         {poolingId && poolingId !== "" && (
-          <div className="flex w-full items-center justify-start p-4">
-            <span className="text-sm text-text">
-              Generating your results...
-            </span>
-            <Spinner className="ml-2 text-text" />
+          <div className="flex flex-col gap-2 items-start justify-center w-full">
+            <div className="flex w-full items-center justify-start">
+              <span className="text-sm text-text">
+                Generating your results...
+              </span>
+              <Spinner className="ml-2 text-text" />
+            </div>
+            <Skeleton className="h-[300px] aspect-[2/3]" />
+            <Skeleton className="h-4 w-[80%]" />
+            <Skeleton className="h-4 w-[80%]" />
           </div>
         )}
 
