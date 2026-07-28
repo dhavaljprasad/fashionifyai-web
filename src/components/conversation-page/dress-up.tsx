@@ -3,12 +3,12 @@ import {
   useState,
   useEffect,
   useRef,
+  useCallback,
   type Dispatch,
   type SetStateAction,
 } from "react";
 import { ConversationData } from "../../app/app/visualizer/[conversation_id]/page";
 import { useParams } from "next/navigation";
-import { UserType, getCurrentUser } from "@/lib/user";
 import { ButtonGroup } from "../modular/button";
 import { DressUpConfig } from "../../utils/dress-up";
 import { api } from "@/lib/api";
@@ -35,7 +35,6 @@ export const DressUpComponent = ({
   const [activeTab, setActiveTab] =
     useState<keyof typeof DressUpConfig>("Women");
   const [selectedOutfit, setSelectedOutfit] = useState<string>("");
-  const [user, setUser] = useState<UserType | null>(null);
   const [capturedImages, setCapturedImages] = useState<CapturedImagesType[]>(
     [],
   );
@@ -46,6 +45,23 @@ export const DressUpComponent = ({
   const [rearCameras, setRearCameras] = useState<MediaDeviceInfo[]>([]);
   const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
 
+  const [showAllOutfits, setShowAllOutfits] = useState(false);
+
+  const selectedOutfitConfig = DressUpConfig[activeTab].find(
+    (item) => item.name === selectedOutfit,
+  );
+  const requiredNeeds =
+    selectedOutfitConfig?.needs.filter((item) => !item.optional) ?? [];
+  const hasRequiredFabricImages =
+    requiredNeeds.length > 0 &&
+    requiredNeeds.every((item) =>
+      capturedImages.some((img) => img.for === item.name),
+    );
+
+  const outfits = DressUpConfig[activeTab];
+
+  const visibleOutfits = showAllOutfits ? outfits : outfits.slice(0, 5);
+
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -55,6 +71,8 @@ export const DressUpComponent = ({
     setActiveTab(tab);
     setSelectedOutfit("");
     setCapturedImages([]);
+    setCustomInstruction("");
+    setShowAllOutfits(false);
   };
 
   const tabsData = [
@@ -72,13 +90,25 @@ export const DressUpComponent = ({
     },
   ];
 
-  const startCamera = async (deviceId?: string) => {
+  const clearSelectedOutfit = () => {
+    setSelectedOutfit("");
+    setCapturedImages([]);
+    setCustomInstruction("");
+    setOpenCamera(false);
+    setCameraFor("");
+  };
+
+  const stopCamera = useCallback(() => {
+    if (!videoRef.current?.srcObject) return;
+
+    const oldStream = videoRef.current.srcObject as MediaStream;
+    oldStream.getTracks().forEach((track) => track.stop());
+    videoRef.current.srcObject = null;
+  }, []);
+
+  const startCamera = useCallback(async (deviceId?: string) => {
     try {
-      // Stop previous stream
-      if (videoRef.current?.srcObject) {
-        const oldStream = videoRef.current.srcObject as MediaStream;
-        oldStream.getTracks().forEach((track) => track.stop());
-      }
+      stopCamera();
 
       const stream = await navigator.mediaDevices.getUserMedia({
         video: deviceId
@@ -93,7 +123,7 @@ export const DressUpComponent = ({
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [stopCamera]);
 
   const onClickOfFabric = (itemName: string) => {
     setCameraFor(itemName);
@@ -150,7 +180,7 @@ export const DressUpComponent = ({
         if (!blob) return;
 
         setCapturedImages((prev) => [
-          ...prev,
+          ...prev.filter((img) => img.for !== cameraFor),
           {
             for: cameraFor,
             previewUrl: URL.createObjectURL(blob),
@@ -164,12 +194,6 @@ export const DressUpComponent = ({
       IMAGE_WEBP_CONTENT_TYPE,
       0.8,
     );
-  };
-
-  const getRearCameras = async () => {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const rear = devices.filter((device) => device.kind === "videoinput");
-    setRearCameras(rear);
   };
 
   const switchCamera = async () => {
@@ -231,7 +255,7 @@ export const DressUpComponent = ({
 
           const finalUrl = URL.createObjectURL(blob);
           setCapturedImages((prev) => [
-            ...prev,
+            ...prev.filter((img) => img.for !== cameraFor),
             {
               for: cameraFor,
               previewUrl: finalUrl,
@@ -258,11 +282,12 @@ export const DressUpComponent = ({
   const onSelectOutfit = (itemName: string) => {
     setSelectedOutfit(itemName);
     setCapturedImages([]);
+    setCustomInstruction("");
   };
 
   const onGeneratePreview = async () => {
     if (uploading) return;
-    if (!capturedImages.length) return;
+    if (!selectedOutfit || !hasRequiredFabricImages) return;
 
     setUploading(true);
 
@@ -351,20 +376,32 @@ export const DressUpComponent = ({
 
   useEffect(() => {
     if (!openCamera) return;
-    startCamera();
-    getRearCameras();
-  }, [openCamera]);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const userInfo = await getCurrentUser();
-      setUser(userInfo);
+    let cancelled = false;
+
+    const setupCamera = async () => {
+      await startCamera();
+      const devices = await navigator.mediaDevices.enumerateDevices();
+
+      if (!cancelled) {
+        setRearCameras(devices.filter((device) => device.kind === "videoinput"));
+      }
     };
-    fetchUser();
-  }, []);
+
+    setupCamera();
+
+    return () => {
+      cancelled = true;
+      stopCamera();
+    };
+  }, [openCamera, startCamera, stopCamera]);
 
   return (
-    <div className="flex w-full flex-col items-center justify-center gap-2 bg-background-secondary p-4">
+    <div
+      className={`flex w-full flex-col items-center justify-center gap-3 bg-background-secondary p-4 transition-opacity duration-200 ${
+        uploading ? "opacity-50" : "opacity-100"
+      }`}
+    >
       <span className="w-full text-left text-sm text-text">Who is it for?</span>
       <ButtonGroup
         data={tabsData}
@@ -374,30 +411,50 @@ export const DressUpComponent = ({
       />
       <span className="w-full text-left text-sm text-text">Outfit Type</span>
       <div className="flex w-full flex-wrap gap-2">
-        {DressUpConfig[activeTab].map((item, key) => (
-          <div
-            key={key}
-            className={`cursor-pointer p-2 ${
-              selectedOutfit === item.name ? "bg-background-primary" : ""
-            }`}
-            onClick={() => onSelectOutfit(item.name)}
+        {selectedOutfit ? (
+          <button
+            type="button"
+            className="flex cursor-pointer items-center gap-2 bg-background-primary px-3 py-2 text-sm font-semibold text-contrast"
+            onClick={clearSelectedOutfit}
           >
-            <h3 className="text-sm">{item.name}</h3>
-          </div>
-        ))}
+            {selectedOutfit}
+            <X size={16} className="text-accent" />
+          </button>
+        ) : (
+          <>
+            {visibleOutfits.map((item) => (
+              <button
+                type="button"
+                key={item.name}
+                className="cursor-pointer bg-background-primary px-3 py-2 text-sm font-semibold text-text transition-colors duration-200 hover:bg-contrast hover:text-background-primary"
+                onClick={() => onSelectOutfit(item.name)}
+              >
+                {item.name}
+              </button>
+            ))}
+
+            {outfits.length > 5 && (
+              <button
+                type="button"
+                onClick={() => setShowAllOutfits((prev) => !prev)}
+                className="cursor-pointer px-3 py-2 text-sm font-semibold text-accent"
+              >
+                {showAllOutfits ? "View less" : `+${outfits.length - 5} more`}
+              </button>
+            )}
+          </>
+        )}
       </div>
-      {selectedOutfit && (
+      {selectedOutfit && !openCamera && (
         <div className="flex h-auto w-full flex-col items-center justify-center gap-2">
           <span className="w-full text-left text-sm text-text">
             Fabric Images
           </span>
-          <div className="flex h-auto w-full flex-col md:flex-row md:flex-wrap">
-            {DressUpConfig[activeTab]
-              .find((item) => item.name === selectedOutfit)
-              ?.needs.map((item, key) => (
+          <div className="grid h-auto w-full grid-cols-1 gap-2 md:grid-cols-2">
+            {selectedOutfitConfig?.needs.map((item, key) => (
                 <div
                   key={key}
-                  className={`flex h-auto w-full cursor-pointer items-center justify-between gap-2 p-2 hover:bg-background-primary md:w-[50%] ${cameraFor === item.name && "border border-accent"}`}
+                  className="flex h-auto w-full cursor-pointer items-center justify-between gap-2 bg-background-primary/70 p-2 transition-colors duration-200 hover:bg-background-primary"
                   onClick={() => onClickOfFabric(item.name)}
                 >
                   <div className="flex items-center justify-start gap-2">
@@ -420,24 +477,52 @@ export const DressUpComponent = ({
                     </h3>
                   </div>
                   {capturedImages.find((img) => img.for === item.name) ? (
-                    <X onClick={() => onDiscardImage(item.name)} />
+                    <X
+                      className="text-accent"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onDiscardImage(item.name);
+                      }}
+                    />
                   ) : null}
                 </div>
               ))}
           </div>
-          <span className="w-full text-left text-sm text-text">
-            Additional Prompt
-          </span>
-          <input
-            className="w-full border-none bg-white/75 p-2 text-sm text-black outline-none focus:bg-white focus:ring-0 focus:outline-none"
-            placeholder="Custom Instruction"
-            value={customInstruction}
-            onChange={(e) => setCustomInstruction(e.target.value)}
-          />
+          {hasRequiredFabricImages && (
+            <>
+              <span className="w-full text-left text-sm text-text">
+                Additional Prompt
+              </span>
+              <input
+                className="w-full border-none bg-white/75 p-2 text-sm text-black outline-none transition-colors duration-200 focus:bg-white focus:ring-0 focus:outline-none"
+                placeholder="Custom Instruction"
+                value={customInstruction}
+                onChange={(e) => setCustomInstruction(e.target.value)}
+              />
+            </>
+          )}
         </div>
       )}
       {openCamera && (
-        <div className="h-[80dvh] w-auto">
+        <div className="flex h-[80dvh] w-full flex-col items-center gap-3">
+          <div className="flex w-full items-center justify-between bg-background-primary px-3 py-2">
+            <div className="flex flex-col">
+              <span className="text-xs text-text">Adding fabric for</span>
+              <span className="text-sm font-semibold text-contrast">
+                {cameraFor}
+              </span>
+            </div>
+            <button
+              type="button"
+              className="flex h-9 w-9 cursor-pointer items-center justify-center bg-contrast"
+              onClick={() => {
+                setOpenCamera(false);
+                setCameraFor("");
+              }}
+            >
+              <X size={18} className="text-background-primary" />
+            </button>
+          </div>
           <div className="relative aspect-[2/3] h-fit max-h-[70dvh]">
             <video
               ref={videoRef}
@@ -478,8 +563,12 @@ export const DressUpComponent = ({
         </div>
       )}
       <div
-        className="flex h-auto w-full cursor-pointer items-center justify-center gap-2 text-accent"
-        onClick={() => onGeneratePreview()}
+        className={`flex h-auto w-full items-center justify-center gap-2 text-accent ${
+          uploading || !hasRequiredFabricImages
+            ? "cursor-not-allowed opacity-60"
+            : "cursor-pointer"
+        }`}
+        onClick={() => (uploading ? null : onGeneratePreview())}
       >
         <span className="text-sm font-semibold">Generate Preview</span>
         <ArrowRight />
