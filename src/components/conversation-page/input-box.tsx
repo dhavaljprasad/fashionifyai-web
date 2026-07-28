@@ -50,7 +50,7 @@ export const InputBox = ({
   };
   return (
     <div className="fixed bottom-4 z-5 h-14 w-full px-4 sm:px-16">
-      <div className="flex h-full w-full items-center justify-center gap-2 bg-white/80 p-2 transition-colors duration-200 focus-within:bg-white">
+      <div className="flex h-full w-full items-center justify-center gap-2 bg-contrast/80 p-2 transition-colors duration-200 focus-within:bg-contrast">
         <input
           type="text"
           value={value}
@@ -58,8 +58,10 @@ export const InputBox = ({
           className="flex-1 bg-transparent text-base sm:text-lg font-semibold text-background-primary outline-none"
         />
         <div
-          className="flex aspect-square h-full items-center justify-center bg-accent"
-          onClick={() => onIterationCall()}
+          className={`flex aspect-square h-full items-center justify-center ${value.length > 0 ? "bg-accent" : "bg-accent/80"}`}
+          onClick={() => {
+            value.length > 0 ? onIterationCall() : () => {};
+          }}
         >
           <SendHorizontal size={24} className="text-white" />
         </div>
