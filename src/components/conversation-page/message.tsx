@@ -18,7 +18,7 @@ export const MessagesBox = ({ data, showImageViewer }: MessagesBoxProps) => {
           className={`relative mt-4 flex w-full ${data?.role === "user" ? "justify-end" : "justify-start"}`}
         >
           <div
-            className="relative h-[300px] w-[220px]"
+            className="relative h-[300px] aspect-[2/3]"
             onClick={() => showImageViewer(data.images)}
           >
             {data.images.map((imageUrl, index) => (
