@@ -12,7 +12,7 @@ export const ButtonPrimary = ({
   buttonTextClass,
   onClick,
 }: {
-  text: string;
+  text?: string;
   icon?: LucideIcon;
   buttonClass?: string;
   buttonTextClass?: string;
@@ -23,11 +23,13 @@ export const ButtonPrimary = ({
       className={`group flex h-auto w-fit cursor-pointer items-center justify-center gap-1 bg-contrast px-4 py-2 transition-colors duration-200 hover:bg-accent ${buttonClass || ""}`}
       onClick={onClick}
     >
-      <span
-        className={`text-xs font-semibold text-background-primary ${buttonTextClass || ""}`}
-      >
-        {text}
-      </span>
+      {text && text?.length > 0 && (
+        <span
+          className={`text-xs font-semibold text-background-primary ${buttonTextClass || ""}`}
+        >
+          {text}
+        </span>
+      )}
       {icon && (
         <span className="text-xs font-semibold text-background-primary transition-transform duration-200 group-hover:translate-x-1">
           {React.createElement(icon, { size: 16 })}
