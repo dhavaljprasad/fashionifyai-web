@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, type Dispatch, type SetStateAction } from "react";
+import { useState, useEffect } from "react";
 import { ButtonPrimary } from "../modular/button";
 import { ModelCard } from "./model-card";
 import { api } from "@/lib/api";
@@ -50,38 +50,33 @@ export type ModelDataType = {
 
 type ModelsSectionProps = {
   openNewModelPopUp: () => void;
-  setPopUpModelData: Dispatch<SetStateAction<ModelDataType | null>>;
-  setNewModelPopUp: (value: boolean) => void;
-  setShowPopUp: (value: boolean) => void;
+  openModelPopUp: (model: ModelDataType) => void;
 };
 
 export const ModelsSection = ({
   openNewModelPopUp,
-  setPopUpModelData,
-  setNewModelPopUp,
-  setShowPopUp,
+  openModelPopUp,
 }: ModelsSectionProps) => {
   const [models, setModels] = useState<ModelDataType[]>([]);
 
-  const getUserModels = async () => {
-    try {
-      const models = await api.get("/api/model");
-      setModels(models.data.models);
-    } catch (e) {
-      console.log("Unexpected error occured getting user models");
+  const openUserModelPopUp = (model_id: string) => {
+    const selectedModel = models.find((model) => model.model_id === model_id);
+    if (selectedModel) {
+      openModelPopUp(selectedModel);
     }
   };
 
-  const openUserModelPopUp = (model_id: string) => {
-    const selectedModel =
-      models.find((model) => model.model_id === model_id) ?? null;
-    setPopUpModelData(selectedModel);
-    setNewModelPopUp(false);
-    setShowPopUp(true);
-  };
-
   useEffect(() => {
-    getUserModels();
+    const getUserModels = async () => {
+      try {
+        const models = await api.get("/api/model");
+        setModels(models.data.models);
+      } catch {
+        console.log("Unexpected error occured getting user models");
+      }
+    };
+
+    void getUserModels();
   }, []);
 
   return (

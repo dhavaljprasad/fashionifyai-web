@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Info, Users, Shirt, CalendarSync, Cog } from "lucide-react";
 import { useAuth } from "@/app/providers/auth";
 import { ButtonPrimary } from "@/components/modular/button";
-import { PopUp } from "@/components/modular/pop-up";
+import { PopUp, type PopUpSizeType } from "@/components/modular/pop-up";
 import { ModelUploadPopUp } from "@/components/modular/pop-up/model-upload";
 import { ModelRenderPopUp } from "@/components/modular/pop-up/model-render";
 import { SegmentedControlButtons } from "@/components/profile/segmented-control-button";
@@ -15,6 +15,8 @@ import {
   ModelsSection,
   ModelDataType,
 } from "@/components/profile/models-section";
+import { WardrobeSection } from "@/components/profile/wardrobe-section";
+import { WardrobeUploadPopUp } from "@/components/modular/pop-up/wardrobe-upload";
 
 type SelectedTabTypes =
   | "Details"
@@ -46,38 +48,54 @@ const tabsHeaderData = [
   },
 ];
 
+type ActivePopUp = {
+  size: PopUpSizeType;
+  header: string;
+  component: React.ReactNode;
+};
+
 function Page() {
-  const [showPopUp, setShowPopUp] = useState<boolean>(false);
-  const [newModelPopUp, setNewModelPopUp] = useState<boolean>(false);
-  const [popUpModelData, setPopUpModelData] = useState<ModelDataType | null>(
-    null,
-  );
+  const [activePopUp, setActivePopUp] = useState<ActivePopUp | null>(null);
   const [selectedTab, setSelectedTab] = useState<SelectedTabTypes>("Details");
   const router = useRouter();
   const { user } = useAuth();
 
+  const closePopUp = () => {
+    setActivePopUp(null);
+  };
+
   const openNewModelUploadPopUp = () => {
-    setNewModelPopUp(true);
-    setShowPopUp(true);
+    setActivePopUp({
+      size: "large",
+      header: "New Model",
+      component: <ModelUploadPopUp onClose={closePopUp} />,
+    });
+  };
+
+  const openModelPopUp = (model: ModelDataType) => {
+    setActivePopUp({
+      size: "large",
+      header: "Model",
+      component: <ModelRenderPopUp data={model} onClose={closePopUp} />,
+    });
+  };
+
+  const openWardrobeUploadPopUp = (model: ModelDataType | null) => {
+    setActivePopUp({
+      size: "large",
+      header: model ? `${model.name} Wardrobe` : "General Wardrobe",
+      component: <WardrobeUploadPopUp onClose={closePopUp} model={model} />,
+    });
   };
 
   return (
     <div className="relative flex min-h-screen w-full flex-col p-4 sm:px-16">
-      {showPopUp && (
+      {activePopUp && (
         <PopUp
-          size="large"
-          header={`${newModelPopUp ? "New Model" : "Model"}`}
-          closePopUp={() => setShowPopUp(false)}
-          component={
-            newModelPopUp ? (
-              <ModelUploadPopUp onClose={() => setShowPopUp(false)} />
-            ) : popUpModelData ? (
-              <ModelRenderPopUp
-                data={popUpModelData}
-                onClose={() => setShowPopUp(false)}
-              />
-            ) : null
-          }
+          size={activePopUp.size}
+          header={activePopUp.header}
+          closePopUp={closePopUp}
+          component={activePopUp.component}
         />
       )}
       <ButtonPrimary
@@ -116,12 +134,14 @@ function Page() {
           ) : selectedTab === "Models" ? (
             <ModelsSection
               openNewModelPopUp={openNewModelUploadPopUp}
-              setPopUpModelData={setPopUpModelData}
-              setNewModelPopUp={setNewModelPopUp}
-              setShowPopUp={setShowPopUp}
+              openModelPopUp={openModelPopUp}
             />
           ) : selectedTab === "Settings" ? (
             <SettingsSection />
+          ) : selectedTab === "Wardrobe" ? (
+            <WardrobeSection
+              openWardrobeUploadPopUp={openWardrobeUploadPopUp}
+            />
           ) : (
             <></>
           )}
