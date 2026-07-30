@@ -344,9 +344,6 @@ function AppPage() {
                 src={selectedImage.previewUrl}
                 className="h-full w-full object-cover"
               />
-              {/* <div className="h-full w-full bg-black text-white flex items-center justify-center">
-                Preview Disabled
-              </div> */}
               <div
                 className={`absolute -bottom-12 flex h-24 w-full items-center justify-around ${uploading ? "opacity-50" : ""}`}
               >
