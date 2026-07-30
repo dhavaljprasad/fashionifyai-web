@@ -380,16 +380,16 @@ export const ModelUploadPopUp = ({ onClose }: { onClose: () => void }) => {
             <div className="absolute z-100 inset-x-0 bottom-0 flex h-24 items-center justify-evenly">
               <button
                 type="button"
-                className="h-16 w-16 bg-accent shadow-lg"
-                onClick={() => captureImage()}
-              />
-              <button
-                type="button"
                 className="flex h-16 w-16 items-center justify-center bg-contrast shadow-lg"
                 onClick={() => inputRef.current?.click()}
               >
                 <Images className="text-accent" size={24} />
               </button>
+              <button
+                type="button"
+                className="h-16 w-16 bg-accent shadow-lg"
+                onClick={() => captureImage()}
+              />
             </div>
           </div>
         )}
