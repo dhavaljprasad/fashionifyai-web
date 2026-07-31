@@ -41,7 +41,7 @@ export const SettingsSection = () => {
 
       <Separator className="w-full bg-accent" />
 
-      <div className="flex w-full flex-col gap-2 py-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+      <div className="flex w-full flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
         <div className="flex items-center gap-3 text-text/70">
           {activeTheme === "light" ? (
             <Moon size={18} className="text-accent" />
@@ -64,7 +64,7 @@ export const SettingsSection = () => {
           </label>
         </div>
       </div>
-      <div className="flex w-full flex-col gap-2 py-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+      <div className="flex w-full flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
         <div className="flex items-center gap-3 text-text/70">
           <LogOut size={18} className="text-accent" />
           <span className="text-xs font-medium uppercase tracking-[0.22em]">
@@ -74,7 +74,7 @@ export const SettingsSection = () => {
 
         <ButtonPrimary text="Sign-Out" onClick={() => onSignOut()} />
       </div>
-      <div className="flex w-full flex-col gap-2 py-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+      <div className="flex w-full flex-col gap-2 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
         <div className="flex items-center gap-3 text-text/70">
           <Trash size={18} className="text-red-500" />
           <span className="text-xs font-medium text-red-500 uppercase tracking-[0.22em]">
