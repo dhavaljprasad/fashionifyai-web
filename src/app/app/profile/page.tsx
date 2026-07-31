@@ -80,11 +80,16 @@ function Page() {
     });
   };
 
-  const openWardrobeUploadPopUp = (model: ModelDataType | null) => {
+  const openWardrobeUploadPopUp = (
+    model_name?: string | null,
+    model_id?: string | null,
+  ) => {
     setActivePopUp({
       size: "large",
-      header: model ? `${model.name} Wardrobe` : "General Wardrobe",
-      component: <WardrobeUploadPopUp onClose={closePopUp} model={model} />,
+      header: model_name ? `${model_name} Upload` : "General",
+      component: (
+        <WardrobeUploadPopUp onClose={closePopUp} model_id={model_id} />
+      ),
     });
   };
 

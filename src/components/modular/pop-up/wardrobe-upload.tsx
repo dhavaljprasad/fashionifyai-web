@@ -9,16 +9,15 @@ import { api } from "@/lib/api";
 import { Images, Plus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { ButtonPrimary } from "@/components/modular/button";
-import { ModelDataType } from "./model-render";
 
 const MAX_WARDROBE_IMAGES = 5;
 
 export const WardrobeUploadPopUp = ({
   onClose,
-  model,
+  model_id,
 }: {
   onClose: () => void;
-  model: ModelDataType | null;
+  model_id?: string | null;
 }) => {
   const [selectedImages, setSelectedImages] = useState<LocalImageSelection[]>(
     [],
@@ -235,7 +234,7 @@ export const WardrobeUploadPopUp = ({
 
       const uploadCreds = await api.post("/api/wardrobe/init-upload", {
         file_names: fileNames,
-        model_id: model?.model_id?.toString() ?? null,
+        model_id: model_id ?? null,
       });
 
       const uploadCredsArray = uploadCreds.data.r2_creds;
@@ -256,7 +255,7 @@ export const WardrobeUploadPopUp = ({
 
       await api.post("/api/wardrobe/upload", {
         img_urls: imageUrls,
-        model_id: model?.model_id?.toString() ?? null,
+        model_id: model_id ?? null,
       });
     } catch (e) {
       console.log("Unexpected error occured uploading wardrobe images", e);
